@@ -1,3 +1,12 @@
 spring:
   application:
     name: backend-api
+  datasource:
+    url: jdbc:sqlserver://<IP>:1433;databaseName=<NOMBRE_BD>;encrypt=false;trustServerCertificate=true
+    username: <USUARIO>
+    password: <PASSWORD>
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
