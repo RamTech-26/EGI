@@ -45,6 +45,7 @@ que integra información almacenada en SQL con los componentes de hardware prove
 | MySQL           | Base de datos de desarrollo           |
 | SQL Server      | Base de datos objetivo                |
 | Spring Security | Seguridad y autenticación             |
+| JWT             | Autenticación sin estado (stateless)  |
 | Postman         | Pruebas de API                        |
 
 ---
@@ -90,7 +91,7 @@ com.inventario.backendapi.sql
 
 ```text
 dto/      -> Objetos de transferencia de datos compartidos con P4
-auth/     -> Configuración de seguridad
+auth/     -> Configuración de seguridad (JWT, filtros)
 config/   -> Configuración de beans (ModelMapper)
 ```
 
@@ -122,13 +123,77 @@ ModelMapper
 DTOs
 ```
 
-Proceso:
+## Proceso
 
 1. El Controller recibe la petición HTTP.
 2. El Service ejecuta la lógica de negocio.
 3. El Repository interactúa con la base de datos.
 4. Las entidades se transforman a DTOs mediante ModelMapper.
 5. El Controller devuelve la respuesta en formato JSON.
+
+---
+
+# Autenticación (JWT)
+
+Este módulo utiliza JWT (JSON Web Token) para autenticar y autorizar las peticiones.
+
+## ¿Cómo funciona?
+
+### 1. Login
+
+El frontend envía credenciales a:
+
+```http
+POST /api/auth/login
+```
+
+Si las credenciales son válidas, el sistema devuelve un token JWT.
+
+### 2. Peticiones autenticadas
+
+Todas las demás llamadas a la API deben incluir el siguiente header:
+
+```text
+Authorization: Bearer <token>
+```
+
+### 3. Validación
+
+Un filtro de Spring Security (`JwtFilter`) intercepta cada petición, valida el token y establece el contexto de seguridad.
+
+### Estado actual
+
+Actualmente el login acepta cualquier usuario y contraseña que no estén vacíos.
+
+Este comportamiento es temporal y será reemplazado por autenticación contra Active Directory mediante LDAPS.
+
+## Endpoint de autenticación
+
+| Método | Endpoint        |
+| ------ | --------------- |
+| POST   | /api/auth/login |
+
+### Request
+
+```json
+{
+  "username": "admin",
+  "password": "admin"
+}
+```
+
+### Response
+
+```json
+{
+  "token": "eyJ...",
+  "username": "admin"
+}
+```
+
+> Todos los demás endpoints requieren el header `Authorization: Bearer <token>`.
+>
+> Si el token no se envía o es inválido, la API responderá con **401 Unauthorized**.
 
 ---
 
@@ -165,16 +230,47 @@ spring:
 3. Ejecutar `BackendApiApplication`.
 4. Probar los endpoints mediante Postman.
 
-### Credenciales temporales
+---
 
-```text
-Usuario: admin
-Contraseña: admin
+# Cómo probar con Postman
+
+## 1. Obtener un token
+
+```http
+POST http://localhost:8080/api/auth/login
 ```
+
+Body:
+
+```json
+{
+  "username": "admin",
+  "password": "admin"
+}
+```
+
+Copiar el token devuelto por la API.
+
+## 2. Utilizar el token
+
+En Postman:
+
+* Abrir la pestaña **Authorization**.
+* Seleccionar **Bearer Token**.
+* Pegar el token obtenido.
+* Realizar la petición deseada.
 
 ---
 
 # Endpoints Disponibles
+
+## Autenticación
+
+| Método | Endpoint        |
+| ------ | --------------- |
+| POST   | /api/auth/login |
+
+---
 
 ## Ubicaciones
 
@@ -195,7 +291,7 @@ Contraseña: admin
 }
 ```
 
-Valores válidos para `area`:
+### Valores válidos para area
 
 ```text
 AULA
@@ -263,14 +359,14 @@ SECRETARIA
 | ------ | -------------------------- |
 | GET    | /api/inventario/{idEquipo} |
 
-Devuelve:
+### Devuelve
 
 * Equipo
 * Ubicación
 * Responsable
 * Componentes de hardware
 
-### Ejemplo de Respuesta
+### Ejemplo de respuesta
 
 ```json
 {
@@ -320,12 +416,12 @@ Devuelve:
 * Conversión automática mediante ModelMapper.
 * Endpoints REST funcionales.
 * Endpoint combinado `/api/inventario/{idEquipo}`.
+* Autenticación con JWT (mock de credenciales).
 * Pruebas locales con MySQL y Postman.
 
 ## Pendiente
 
-* Implementación de JWT.
-* Integración con LDAPS / Active Directory.
+* Integración de validación de credenciales con LDAPS / Active Directory.
 * Pruebas sobre SQL Server.
 * Integración real con MongoDB (reemplazo del mock).
 * Dockerización del servicio.
@@ -337,6 +433,8 @@ Devuelve:
 ```text
 feature/backend-sql
 ```
+
+---
 
 # Autor
 
