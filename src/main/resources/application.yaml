@@ -1,11 +1,29 @@
+#spring:
+#  application:
+#    name: backend-api
+#  datasource:
+#    url: jdbc:sqlserver://<IP>:1433;databaseName=<NOMBRE_BD>;encrypt=false;trustServerCertificate=true
+#    username: <USUARIO>
+#    password: <PASSWORD>
+#    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+
+#Prueba Local -->
 spring:
   application:
     name: backend-api
+  security:
+    user:
+      name: admin
+      password: admin
   datasource:
-    url: jdbc:sqlserver://<IP>:1433;databaseName=<NOMBRE_BD>;encrypt=false;trustServerCertificate=true
-    username: <USUARIO>
-    password: <PASSWORD>
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    url: jdbc:mysql://localhost:3306/inventario?useSSL=false&serverTimezone=UTC
+    username: root
+    password: matifer
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
