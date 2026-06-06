@@ -1,3 +1,6 @@
 spring:
   application:
     name: backend-api
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/inventario
