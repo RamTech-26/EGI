@@ -25,7 +25,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()          // Login público
                         // TODO: En producción, proteger TODOS los endpoints exigiendo autenticación:
                         // .anyRequest().authenticated()
-                        .anyRequest().permitAll()                            // Temporal: abierto para pruebas de frontend
+                        .anyRequest().authenticated()                            // Temporal: abierto para pruebas de frontend
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
