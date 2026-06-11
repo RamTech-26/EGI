@@ -1,18 +1,25 @@
-spring:
-  application:
-    name: backend-api
-  datasource:
-    url: jdbc:sqlserver://<IP>:1433;databaseName=<NOMBRE_BD>;encrypt=false;trustServerCertificate=true
-    username: <USUARIO>
-    password: <PASSWORD>
-    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    spring:
-  ldap:
-    urls: ldap://<IP_WAN_PFSENSE>:389
-    base: dc=itu,dc=local
-    username: cn=svc_backend,cn=Users,dc=itu,dc=local
-    password: <PASSWORD_SERVICIO>
+# Plantilla de configuración - Copiar a application.yaml y completar
+#spring:
+#  application:
+#    name: backend-api
+#  datasource:
+#    url: jdbc:sqlserver://<IP>:1433;databaseName=<NOMBRE_BD>;encrypt=false;trustServerCertificate=true
+#    username: <USUARIO>
+#    password: <PASSWORD>
+#    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    show-sql: true
+#  ldap:
+#    urls: ldap://<IP_WAN_PFSENSE>:389
+#    base: dc=itu,dc=local
+#    username: cn=svc_backend,cn=Users,dc=itu,dc=local
+#    password: <PASSWORD_SERVICIO>
+#  java:
+#    security:
+#      krb5:
+#        conf: /ruta/al/krb5.conf
+#      auth:
+#        login:
+#          config: /ruta/al/login.conf
