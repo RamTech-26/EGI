@@ -1,443 +1,301 @@
-# Backend SQL - Módulo P3 (Matías)
+# Backend SQL con Kerberos - Módulo P3 (Matías)
 
-API REST para la gestión de ubicaciones, responsables y equipos del inventario.
-
+API REST con autenticación LDAP contra Active Directory y delegación Kerberos a SQL Server.
 Parte del Proyecto Integrador EGI.
 
 ---
 
-# ¿Qué hace este módulo?
+## ¿Qué hace este módulo?
 
-Este módulo se encarga de gestionar la información relacional del inventario:
-
-* Dónde está cada equipo (Ubicación).
-* Quién tiene asignado cada equipo (Responsable).
-* Datos propios del equipo (código, fecha de adquisición, etc.).
-
-Además, expone endpoints REST para que el frontend pueda:
-
-* Listar registros.
-* Crear registros.
-* Modificar registros.
-* Eliminar registros.
-
-También incluye un endpoint combinado:
-
-```http
-GET /api/inventario/{idEquipo}
-```
-
-que integra información almacenada en SQL con los componentes de hardware provenientes del módulo MongoDB (actualmente mediante datos mock).
+- Autentica usuarios contra Active Directory vía LDAP.
+- Consulta los grupos del usuario en AD y los convierte en roles (LECTOR, EDITOR, ADMINISTRADOR).
+- Genera tokens JWT con los roles para autorizar peticiones.
+- Protege los endpoints REST según el rol del usuario.
+- Se conecta a SQL Server usando Kerberos, delegando la identidad del usuario autenticado.
+- SQL Server aplica sus propios permisos granulares según el grupo de AD del usuario.
+- Gestiona ubicaciones, responsables y equipos del inventario.
+- Expone un endpoint combinado con MongoDB (mock temporal).
 
 ---
 
-# Tecnologías Utilizadas
+## Tecnologías
 
-| Tecnología      | Uso                                   |
-| --------------- | ------------------------------------- |
-| Java 21         | Lenguaje principal                    |
-| Spring Boot 3.x | Framework principal                   |
-| Spring Data JPA | Acceso a datos                        |
-| Hibernate       | ORM y generación automática de tablas |
-| Lombok          | Reducción de código repetitivo        |
-| ModelMapper     | Conversión entre entidades y DTOs     |
-| Maven           | Gestión de dependencias               |
-| MySQL           | Base de datos de desarrollo           |
-| SQL Server      | Base de datos objetivo                |
-| Spring Security | Seguridad y autenticación             |
-| JWT             | Autenticación sin estado (stateless)  |
-| Postman         | Pruebas de API                        |
+| Tecnología | Uso |
+|------------|-----|
+| Java 21 | Lenguaje principal |
+| Spring Boot 3.x | Framework REST |
+| Spring Security | Autenticación y autorización |
+| Spring LDAP | Conexión y consultas a Active Directory |
+| Spring Data JPA | Acceso a SQL Server |
+| JWT (jjwt 0.12.6) | Tokens de autenticación sin estado |
+| Kerberos (JAAS) | Delegación de identidad a SQL Server |
+| ModelMapper | Conversión entre entidades y DTOs |
+| Lombok | Reducción de código repetitivo |
+| Maven | Gestión de dependencias |
+| MySQL | Base de datos de desarrollo local |
+| SQL Server | Base de datos objetivo (producción) |
+| Docker | Contenerización |
 
 ---
 
-# Estructura del Proyecto
-
+## Estructura del proyecto
 ```text
-com.inventario.backendapi.sql
-│
-├── model
-│   ├── BaseSql.java
-│   ├── Area.java
-│   ├── Ubicacion.java
-│   ├── Responsable.java
-│   └── Equipo.java
-│
-├── repository
-│   ├── BaseSqlRepository.java
-│   ├── UbicacionRepository.java
-│   ├── ResponsableRepository.java
-│   └── EquipoRepository.java
-│
-├── service
-│   ├── BaseSqlService.java
-│   ├── BaseSqlServiceImpl.java
-│   ├── UbicacionService.java
-│   ├── UbicacionServiceImpl.java
-│   ├── ResponsableService.java
-│   ├── ResponsableServiceImpl.java
-│   ├── EquipoService.java
-│   ├── EquipoServiceImpl.java
-│   ├── InventarioCompletoService.java
-│   └── InventarioCompletoServiceImpl.java
-│
-└── controller
-    ├── UbicacionController.java
-    ├── ResponsableController.java
-    ├── EquipoController.java
-    └── InventarioCompletoController.java
+src/
+└── main/
+    └── java/
+        └── com/
+            └── inventario/
+                └── backendapi/
+                    ├── auth/
+                    │   ├── AuthController.java
+                    │   ├── JwtUtil.java
+                    │   ├── JwtFilter.java
+                    │   ├── LdapAuthService.java
+                    │   └── SecurityConfig.java
+                    │
+                    ├── config/
+                    │   ├── KerberosDataSourceConfig.java
+                    │   └── ModelMapperConfig.java
+                    │
+                    ├── dto/
+                    │   ├── EquipoDTO.java
+                    │   ├── HardwareDTO.java
+                    │   ├── InventarioCompletoDTO.java
+                    │   ├── LoginRequest.java
+                    │   ├── LoginResponse.java
+                    │   ├── ResponsableDTO.java
+                    │   └── UbicacionDTO.java
+                    │
+                    └── sql/
+                        ├── model/
+                        │   ├── Area.java
+                        │   ├── BaseSql.java
+                        │   ├── Equipo.java
+                        │   ├── Responsable.java
+                        │   └── Ubicacion.java
+                        │
+                        ├── repository/
+                        │   ├── BaseSqlRepository.java
+                        │   ├── EquipoRepository.java
+                        │   ├── ResponsableRepository.java
+                        │   └── UbicacionRepository.java
+                        │
+                        ├── service/
+                        │   ├── BaseSqlService.java
+                        │   ├── BaseSqlServiceImpl.java
+                        │   ├── EquipoService.java
+                        │   ├── EquipoServiceImpl.java
+                        │   ├── InventarioCompletoService.java
+                        │   ├── InventarioCompletoServiceImpl.java
+                        │   ├── ResponsableService.java
+                        │   ├── ResponsableServiceImpl.java
+                        │   ├── UbicacionService.java
+                        │   └── UbicacionServiceImpl.java
+                        │
+                        └── controller/
+                            ├── EquipoController.java
+                            ├── InventarioCompletoController.java
+                            ├── ResponsableController.java
+                            └── UbicacionController.java
 ```
 
-## Otros paquetes relevantes
 
-```text
-dto/      -> Objetos de transferencia de datos compartidos con P4
-auth/     -> Configuración de seguridad (JWT, filtros)
-config/   -> Configuración de beans (ModelMapper)
-```
 
 ---
 
-# Flujo de una Petición
-
-```text
-Frontend
-    │
-    ▼
-Controller
-    │
-    ▼
-Service
-    │
-    ▼
-Repository
-    │
-    ▼
-Base de Datos
-
-Entidades
-    │
-    ▼
-ModelMapper
-    │
-    ▼
-DTOs
-```
-
-## Proceso
-
-1. El Controller recibe la petición HTTP.
-2. El Service ejecuta la lógica de negocio.
-3. El Repository interactúa con la base de datos.
-4. Las entidades se transforman a DTOs mediante ModelMapper.
-5. El Controller devuelve la respuesta en formato JSON.
-
----
-
-# Autenticación (JWT)
-
-Este módulo utiliza JWT (JSON Web Token) para autenticar y autorizar las peticiones.
-
-## ¿Cómo funciona?
+## Flujo de autenticación y autorización
 
 ### 1. Login
-
-El frontend envía credenciales a:
-
-```http
-POST /api/auth/login
-```
-
-Si las credenciales son válidas, el sistema devuelve un token JWT.
+1. El frontend envía POST /api/auth/login con username y password.
+2. LdapAuthService hace un bind LDAP contra Active Directory (puerto 389).
+3. Si las credenciales son válidas, consulta los grupos del usuario en AD.
+4. Convierte los grupos de AD a roles de aplicación:
+    - Profesores → LECTOR
+    - Responsables → EDITOR
+    - Administradores → ADMINISTRADOR
+5. Genera un token JWT firmado que contiene el username y los roles.
+6. Devuelve el token al frontend.
 
 ### 2. Peticiones autenticadas
+1. El frontend incluye el token en el header: Authorization: Bearer <token>.
+2. JwtFilter intercepta la petición, valida el token y extrae username y roles.
+3. Establece el contexto de seguridad de Spring con los roles correspondientes.
+4. SecurityConfig verifica si el rol es suficiente para el endpoint solicitado:
+    - GET → LECTOR, EDITOR o ADMINISTRADOR
+    - POST, PUT, DELETE → EDITOR o ADMINISTRADOR
 
-Todas las demás llamadas a la API deben incluir el siguiente header:
-
-```text
-Authorization: Bearer <token>
-```
-
-### 3. Validación
-
-Un filtro de Spring Security (`JwtFilter`) intercepta cada petición, valida el token y establece el contexto de seguridad.
-
-### Estado actual
-
-Actualmente el login acepta cualquier usuario y contraseña que no estén vacíos.
-
-Este comportamiento es temporal y será reemplazado por autenticación contra Active Directory mediante LDAPS.
-
-## Endpoint de autenticación
-
-| Método | Endpoint        |
-| ------ | --------------- |
-| POST   | /api/auth/login |
-
-### Request
-
-```json
-{
-  "username": "admin",
-  "password": "admin"
-}
-```
-
-### Response
-
-```json
-{
-  "token": "eyJ...",
-  "username": "admin"
-}
-```
-
-> Todos los demás endpoints requieren el header `Authorization: Bearer <token>`.
->
-> Si el token no se envía o es inválido, la API responderá con **401 Unauthorized**.
+### 3. Conexión a SQL Server con Kerberos
+1. KerberosDataSourceConfig configura el datasource con integratedSecurity=true y authenticationScheme=JavaKerberos.
+2. La JVM usa los archivos krb5.conf y login.conf para autenticarse con el KDC (AD).
+3. El backend obtiene un ticket de servicio Kerberos para SQL Server a nombre del usuario autenticado.
+4. SQL Server recibe el ticket, extrae la identidad del usuario y aplica sus permisos de base de datos según los grupos de AD.
+5. Las contraseñas nunca viajan a SQL Server, solo tickets Kerberos cifrados.
 
 ---
 
-# Configuración Local
+## Perfiles de configuración
 
-## Requisitos
-
-* Java 21
-* MySQL ejecutándose en localhost:3306
-* Base de datos `inventario`
-* Maven
-* Postman (opcional)
-
-## application.yml
-
-```yaml
+### Perfil por defecto (desarrollo local con MySQL)
 spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/inventario?useSSL=false&serverTimezone=UTC
-    username: root
-    password: tu_password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+datasource:
+url: jdbc:mysql://localhost:3306/inventario
+username: root
+password: tu_password
+jpa:
+hibernate:
+ddl-auto: update
+ldap:
+urls: ldap://<IP_WAN_PFSENSE>:389
+base: dc=itu,dc=local
+username: cn=svc_backend,cn=Users,dc=itu,dc=local
+password: <PASSWORD>
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-```
 
-## Ejecución
+### Perfil kerberos (producción con SQL Server)
+Activar con spring.profiles.active=kerberos en application.yaml o variable de entorno.
+spring:
+datasource:
+url: jdbc:sqlserver://<IP>:1433;databaseName=<BD>;integratedSecurity=true
+jpa:
+hibernate:
+ddl-auto: validate
+java:
+security:
+krb5:
+conf: /etc/krb5.conf
+auth:
+login:
+config: /etc/login.conf
 
-1. Clonar el repositorio.
-2. Configurar la base de datos.
-3. Ejecutar `BackendApiApplication`.
-4. Probar los endpoints mediante Postman.
 
 ---
 
-# Cómo probar con Postman
+## Archivos de configuración Kerberos
 
-## 1. Obtener un token
+### krb5.conf
+[libdefaults]
+default_realm = <REALM>
+ticket_lifetime = 24h
+forwardable = true
 
-```http
-POST http://localhost:8080/api/auth/login
-```
-
-Body:
-
-```json
-{
-  "username": "admin",
-  "password": "admin"
+[realms]
+<REALM> = {
+kdc = <IP_KDC>
+admin_server = <IP_KDC>
 }
-```
 
-Copiar el token devuelto por la API.
+[domain_realm]
+.<dominio> = <REALM>
 
-## 2. Utilizar el token
+### login.conf
+SQLJDBCDriver {
+com.sun.security.auth.module.Krb5LoginModule required
+useKeyTab=true
+keyTab="<RUTA_AL_KEYTAB>"
+principal="<USUARIO_PRINCIPAL>"
+storeKey=true
+debug=false;
+};
 
-En Postman:
 
-* Abrir la pestaña **Authorization**.
-* Seleccionar **Bearer Token**.
-* Pegar el token obtenido.
-* Realizar la petición deseada.
-
----
-
-# Endpoints Disponibles
-
-## Autenticación
-
-| Método | Endpoint        |
-| ------ | --------------- |
-| POST   | /api/auth/login |
+Importante: Los archivos krb5.conf, login.conf y *.keytab están en .gitignore. Usar las plantillas .example para documentación.
 
 ---
 
-## Ubicaciones
+## Endpoints
 
-| Método | Endpoint              |
-| ------ | --------------------- |
-| GET    | /api/ubicaciones      |
-| GET    | /api/ubicaciones/{id} |
-| POST   | /api/ubicaciones      |
-| PUT    | /api/ubicaciones/{id} |
-| DELETE | /api/ubicaciones/{id} |
+### Autenticación
+| Método | Ruta | Body | Respuesta |
+|--------|------|------|-----------|
+| POST | /api/auth/login | { "username": "...", "password": "..." } | { "token": "eyJ...", "username": "..." } |
 
-### Ejemplo POST
+### Ubicaciones
+| Método | Ruta | Roles |
+|--------|------|-------|
+| GET | /api/ubicaciones | LECTOR, EDITOR, ADMIN |
+| GET | /api/ubicaciones/{id} | LECTOR, EDITOR, ADMIN |
+| POST | /api/ubicaciones | EDITOR, ADMIN |
+| PUT | /api/ubicaciones/{id} | EDITOR, ADMIN |
+| DELETE | /api/ubicaciones/{id} | EDITOR, ADMIN |
 
-```json
-{
-  "edificio": "Central",
-  "area": "AULA"
-}
-```
+### Responsables
+| Método | Ruta | Roles |
+|--------|------|-------|
+| GET | /api/responsables | LECTOR, EDITOR, ADMIN |
+| GET | /api/responsables/{id} | LECTOR, EDITOR, ADMIN |
+| POST | /api/responsables | EDITOR, ADMIN |
+| PUT | /api/responsables/{id} | EDITOR, ADMIN |
+| DELETE | /api/responsables/{id} | EDITOR, ADMIN |
 
-### Valores válidos para area
+### Equipos
+| Método | Ruta | Roles |
+|--------|------|-------|
+| GET | /api/equipos | LECTOR, EDITOR, ADMIN |
+| GET | /api/equipos/{id} | LECTOR, EDITOR, ADMIN |
+| POST | /api/equipos | EDITOR, ADMIN |
+| PUT | /api/equipos/{id} | EDITOR, ADMIN |
+| DELETE | /api/equipos/{id} | EDITOR, ADMIN |
 
-```text
-AULA
-LABORATORIO
-SECRETARIA
-```
-
----
-
-## Responsables
-
-| Método | Endpoint               |
-| ------ | ---------------------- |
-| GET    | /api/responsables      |
-| GET    | /api/responsables/{id} |
-| POST   | /api/responsables      |
-| PUT    | /api/responsables/{id} |
-| DELETE | /api/responsables/{id} |
-
-### Ejemplo POST
-
-```json
-{
-  "nombre": "Juan",
-  "apellido": "Perez",
-  "email": "juan@correo.com",
-  "telefono": "123456"
-}
-```
+### Inventario Completo
+| Método | Ruta | Roles |
+|--------|------|-------|
+| GET | /api/inventario/{idEquipo} | LECTOR, EDITOR, ADMIN |
 
 ---
 
-## Equipos
+## Docker
 
-| Método | Endpoint          |
-| ------ | ----------------- |
-| GET    | /api/equipos      |
-| GET    | /api/equipos/{id} |
-| POST   | /api/equipos      |
-| PUT    | /api/equipos/{id} |
-| DELETE | /api/equipos/{id} |
+### Construcción de la imagen
 
-### Ejemplo POST
+docker build -t backend-api-kerberos .
 
-```json
-{
-  "codigo": "PC-01",
-  "fechaAdquisicion": "2025-03-15",
-  "ubicacion": {
-    "id": 1
-  },
-  "responsable": {
-    "id": 1
-  }
-}
-```
 
-**Importante:** para las referencias de ubicación y responsable únicamente es necesario enviar el ID.
+### Ejecución del contenedor
+
+docker run -p 8080:8080
+-e JAVA_OPTS="-Djava.security.krb5.conf=/etc/krb5.conf -Djava.security.auth.login.config=/etc/login.conf"
+-v /ruta/local/krb5.conf:/etc/krb5.conf
+-v /ruta/local/login.conf:/etc/login.conf
+-v /ruta/local/backend.keytab:/etc/krb5.keytab
+backend-api-kerberos
+
 
 ---
 
-## Inventario Completo
+## Checklist de implementación
 
-| Método | Endpoint                   |
-| ------ | -------------------------- |
-| GET    | /api/inventario/{idEquipo} |
+### Completado
+- [x] Estructura del proyecto Spring Boot
+- [x] Entidades JPA y repositorios
+- [x] CRUD completo (ubicaciones, responsables, equipos)
+- [x] Endpoint combinado /api/inventario/{idEquipo} (mock MongoDB)
+- [x] DTOs compartidos unificados en feature/backend-base
+- [x] Autenticación LDAP contra Active Directory
+- [x] Roles en JWT (LECTOR, EDITOR, ADMINISTRADOR)
+- [x] Protección de endpoints por rol
+- [x] Configuración Kerberos (krb5.conf, login.conf, KerberosDataSourceConfig)
+- [x] Conexión a SQL Server con autenticación integrada Windows
+- [x] Dockerfile multi-stage con soporte Kerberos
+- [x] .gitignore para archivos sensibles (keytab, krb5.conf, login.conf, application.yaml)
 
-### Devuelve
+### Pendiente (depende de P2)
+- [ ] Datos reales de AD (IP WAN pfSense, dominio, base DN, usuario de servicio, contraseña)
+- [ ] Keytab para el SPN de SQL Server
+- [ ] SPN registrado en AD (MSSQLSvc/<HOST>:1433)
+- [ ] NAT en pfSense (puertos 389 y 1433)
+- [ ] Pruebas de integración reales
 
-* Equipo
-* Ubicación
-* Responsable
-* Componentes de hardware
+### Pendiente (depende de P4)
+- [ ] Reemplazar mock de HardwareDTO por llamada real al servicio MongoDB
 
-### Ejemplo de respuesta
-
-```json
-{
-  "equipo": {
-    "id": 1,
-    "codigo": "PC-01",
-    "fechaAdquisicion": "2025-03-15",
-    "ubicacionId": 1,
-    "responsableId": 1
-  },
-  "ubicacion": {
-    "id": 1,
-    "edificio": "Central",
-    "area": "AULA"
-  },
-  "responsable": {
-    "id": 1,
-    "nombre": "Juan",
-    "apellido": "Perez",
-    "email": "juan@correo.com",
-    "telefono": "123456"
-  },
-  "componentes": [
-    {
-      "id": "mock-1",
-      "idEquipo": 1,
-      "tipo": "CPU",
-      "marca": "Intel",
-      "modelo": "i7",
-      "estado": "Operativo"
-    }
-  ]
-}
-```
+### Pendiente (depende de P1)
+- [ ] Manifiestos Kubernetes con Secrets para keytab y archivos Kerberos
+- [ ] Despliegue en Minikube
 
 ---
 
-# Estado del Proyecto
+## Rama
+feature/backend-api-kerberos
 
-## Completado
-
-* Estructura base del proyecto Spring Boot.
-* Entidades JPA y relaciones.
-* Repositorios con Spring Data JPA.
-* CRUD completo para Ubicaciones, Responsables y Equipos.
-* DTOs compartidos.
-* Conversión automática mediante ModelMapper.
-* Endpoints REST funcionales.
-* Endpoint combinado `/api/inventario/{idEquipo}`.
-* Autenticación con JWT (mock de credenciales).
-* Pruebas locales con MySQL y Postman.
-
-## Pendiente
-
-* Integración de validación de credenciales con LDAPS / Active Directory.
-* Pruebas sobre SQL Server.
-* Integración real con MongoDB (reemplazo del mock).
-* Dockerización del servicio.
-
----
-
-# Rama de Desarrollo
-
-```text
-feature/backend-sql
-```
-
----
-
-# Autor
-
-**Matías Fernández (P3)**
-
-Proyecto Integrador EGI.
+## Autor
+Matías (P3) - Proyecto Integrador EGI
