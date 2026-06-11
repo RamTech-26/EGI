@@ -34,3 +34,8 @@ build/
 
 ### Applications yaml###
 src/main/resources/application.yaml
+
+# Kerberos (datos sensibles - no subir)
+src/main/resources/krb5.conf
+src/main/resources/login.conf
+src/main/resources/*.keytab
