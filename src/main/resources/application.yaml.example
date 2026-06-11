@@ -10,3 +10,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    spring:
+  ldap:
+    urls: ldap://<IP_WAN_PFSENSE>:389
+    base: dc=itu,dc=local
+    username: cn=svc_backend,cn=Users,dc=itu,dc=local
+    password: <PASSWORD_SERVICIO>
