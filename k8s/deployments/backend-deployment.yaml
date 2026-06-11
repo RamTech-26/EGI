@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api
+  namespace: inventario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-api
+  template:
+    metadata:
+      labels:
+        app: backend-api
+    spec:
+      containers:
+        - name: backend-api
+          image: backend-api:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGO_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_USER
+            - name: MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: MONGO_PASS
+            - name: MONGO_HOST
+              value: "inventario-db"
+            - name: MONGO_PORT
+              value: "27017"
+            - name: MONGO_DB
+              value: "inventario"
+            - name: SQL_HOST
+              value: "ubicacion-db"
+            - name: SQL_PORT
+              value: "1433"
+            - name: LDAP_HOST
+              value: "ldap-service"
+            - name: LDAP_PORT
+              value: "636"
