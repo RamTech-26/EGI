@@ -1,0 +1,10 @@
+/* Plantilla JAAS para autenticación Kerberos con SQL Server */
+/* Copiar a login.conf y reemplazar <RUTA_AL_KEYTAB> y <USUARIO_PRINCIPAL> */
+SQLJDBCDriver {
+    com.sun.security.auth.module.Krb5LoginModule required
+    useKeyTab=true
+    keyTab="<RUTA_AL_KEYTAB>"
+    principal="<USUARIO_PRINCIPAL>"
+    storeKey=true
+    debug=false;
+};
