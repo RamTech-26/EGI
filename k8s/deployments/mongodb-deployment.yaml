@@ -31,3 +31,10 @@ spec:
                   key: MONGO_PASS
             - name: MONGO_INITDB_DATABASE
               value: "inventario"
+          volumeMounts:
+            - name: mongodb-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongodb-storage
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
