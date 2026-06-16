@@ -94,11 +94,20 @@ Puerto:   389 (LDAP sin TLS — NO usar 636)
 | `GRP_ADMINISTRADOR` | ADMINISTRADOR |
 
 ### Usuarios de prueba
-| Usuario | Grupo | Contraseña |
-|---|---|---|
-| `usr.lector` | GRP_LECTOR | `Itu12345!` |
-| `usr.editor` | GRP_EDITOR | `Itu12345!` |
-| `usr.admin` | GRP_ADMINISTRADOR | `Itu12345!` |
+
+El sistema tiene 3 roles definidos por el enunciado (LECTOR, EDITOR, ADMINISTRADOR).  
+Para que el backend pueda probar la autenticación LDAP y la autorización por rol  
+sin depender de cuentas reales de la universidad, se crean estos usuarios en AD:
+
+| Usuario | Grupo | Contraseña | Para probar... |
+|---|---|---|---|
+| `usr.lector` | GRP_LECTOR | `Itu12345!` | Login con rol solo lectura |
+| `usr.editor` | GRP_EDITOR | `Itu12345!` | Login con rol edición |
+| `usr.admin` | GRP_ADMINISTRADOR | `Itu12345!` | Login con rol administrador |
+
+Cuando el backend recibe un login, consulta AD vía LDAP, verifica la contraseña  
+y lee el grupo del usuario para asignarle el rol correspondiente en el JWT.  
+Estos usuarios simulan un profesor (lector), técnico (editor) y administrador real.
 
 ### Cuentas de servicio
 | Usuario | Propósito | Contraseña |
