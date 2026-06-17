@@ -13,6 +13,7 @@ spec:
       labels:
         app: backend-api
     spec:
+      serviceAccountName: sa-backend
       containers:
         - name: backend-api
           image: backend-api:v1
