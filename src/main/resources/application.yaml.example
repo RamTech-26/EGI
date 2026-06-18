@@ -1,4 +1,4 @@
-# Plantilla - Copiar a application.yaml y definir las variables de entorno
+# Plantilla de configuración - Copiar a application.yaml y definir las variables de entorno
 spring:
   application:
     name: backend-api
@@ -23,3 +23,7 @@ spring:
       auth:
         login:
           config: ${LOGIN_CONF}
+
+mongo:
+  service:
+    url: ${MONGO_SERVICE_URL:http://localhost:8080}

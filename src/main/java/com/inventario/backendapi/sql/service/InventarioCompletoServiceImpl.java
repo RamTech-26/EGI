@@ -3,12 +3,18 @@ package com.inventario.backendapi.sql.service;
 import com.inventario.backendapi.dto.*;
 import com.inventario.backendapi.sql.model.Equipo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class InventarioCompletoServiceImpl implements InventarioCompletoService {
+
+    @Value("${mongo.service.url:http://localhost:8080}")
+    private String mongoServiceUrl;
 
     @Autowired
     private EquipoService equipoService;
@@ -34,27 +40,18 @@ public class InventarioCompletoServiceImpl implements InventarioCompletoService 
             responsableDTO = responsableService.convertirADTO(equipo.getResponsable());
         }
 
-        // Mock MongoDB - reemplazar cuando P4 tenga HardwareService
-        List<HardwareDTO> componentesMock = new ArrayList<>();
-        HardwareDTO mock = new HardwareDTO();
-        mock.setId("mock-1");
-        mock.setFabricante("Intel");
-        mock.setModelo("i7-13700K");
-        mock.setTipo("CPU");
-        mock.setCpu("Intel Core i7");
-        mock.setRam("16GB");
-        mock.setDisco("512GB SSD");
-        mock.setSistemaOperativo("Windows 11");
-        mock.setMonitor("24 pulgadas");
-        mock.setMouse("Óptico");
-        mock.setTeclado("Mecánico");
-        componentesMock.add(mock);
+        // Llamada real al servicio MongoDB de P4
+        String codigoEquipo = equipo.getCodigo();
+        String mongoUrl = mongoServiceUrl + "/api/hardware/" + codigoEquipo;
+        RestTemplate restTemplate = new RestTemplate();
+        HardwareDTO[] componentesArray = restTemplate.getForObject(mongoUrl, HardwareDTO[].class);
+        List<HardwareDTO> componentes = Arrays.asList(componentesArray);
 
         InventarioCompletoDTO dto = new InventarioCompletoDTO();
         dto.setEquipo(equipoDTO);
         dto.setUbicacion(ubicacionDTO);
         dto.setResponsable(responsableDTO);
-        dto.setComponentes(componentesMock);
+        dto.setComponentes(componentes);
 
         return dto;
     }
