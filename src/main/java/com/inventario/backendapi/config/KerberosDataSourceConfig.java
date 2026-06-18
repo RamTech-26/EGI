@@ -38,7 +38,7 @@ public class KerberosDataSourceConfig {
         props.setProperty("integratedSecurity", "true");
         props.setProperty("authenticationScheme", "JavaKerberos");
         // TODO: Ajustar SPN y host del SQL Server según datos de P2
-        props.setProperty("serverSpn", "MSSQLSvc/<HOST_SQL_SERVER>:1433");
+        props.setProperty("serverSpn", "MSSQLSvc/10.10.10.20:1433");
         config.setDataSourceProperties(props);
 
         return new HikariDataSource(config);
