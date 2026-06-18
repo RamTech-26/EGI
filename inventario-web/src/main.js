@@ -32,8 +32,8 @@ let modoConexion = "API";
 
 function getRoleLabel(role) {
   const labels = {
-    LECTURA: "Lectura",
-    EDICION: "Edición",
+    LECTOR: "Lector",
+    EDITOR: "Editor",
     ADMINISTRADOR: "Administrador"
   };
 
@@ -110,7 +110,7 @@ function renderDashboard() {
   app.innerHTML = `
     <main class="layout">
       <aside class="sidebar">
-        <h2>Inventario SITU</h2>
+        <h2>SITU</h2>
         <p>Sistema de Inventario</p>
 
         <button id="btn-inventario">Equipos informáticos</button>

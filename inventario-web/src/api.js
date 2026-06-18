@@ -1,8 +1,8 @@
 ﻿const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export const ROLES = {
-  LECTURA: "LECTURA",
-  EDICION: "EDICION",
+  LECTOR: "LECTOR",
+  EDITOR: "EDITOR",
   ADMINISTRADOR: "ADMINISTRADOR"
 };
 
@@ -14,15 +14,15 @@ export class ApiError extends Error {
 }
 
 function normalizeRole(role) {
-  if (!role) return ROLES.LECTURA;
+  if (!role) return ROLES.LECTOR;
 
   const value = String(role).toUpperCase();
 
   if (value.includes("ADMIN")) return ROLES.ADMINISTRADOR;
-  if (value.includes("EDIT") || value.includes("EDICION")) return ROLES.EDICION;
-  if (value.includes("LECT") || value.includes("READ")) return ROLES.LECTURA;
+  if (value.includes("EDIT") || value.includes("EDITOR")) return ROLES.EDITOR;
+  if (value.includes("LECT") || value.includes("READ")) return ROLES.LECTOR;
 
-  return ROLES.LECTURA;
+  return ROLES.LECTOR;
 }
 
 function decodeJwtPayload(token) {
@@ -157,18 +157,18 @@ export async function login(username, password) {
 export function setMockSession(username) {
   const normalizedUsername = String(username || "").toLowerCase();
 
-  let role = ROLES.LECTURA;
+  let role = ROLES.LECTOR;
 
   if (normalizedUsername === "admin" || normalizedUsername === "administrador") {
     role = ROLES.ADMINISTRADOR;
   }
 
-  if (normalizedUsername === "editor" || normalizedUsername === "edicion") {
-    role = ROLES.EDICION;
+  if (normalizedUsername === "editor" || normalizedUsername === "editor") {
+    role = ROLES.EDITOR;
   }
 
   if (normalizedUsername === "ana" || normalizedUsername === "lector") {
-    role = ROLES.LECTURA;
+    role = ROLES.LECTOR;
   }
 
   localStorage.setItem("token", "mock-token");
@@ -190,7 +190,7 @@ export function logout() {
 export function getCurrentUser() {
   return {
     username: localStorage.getItem("username") || "usuario",
-    role: localStorage.getItem("role") || ROLES.LECTURA
+    role: localStorage.getItem("role") || ROLES.LECTOR
   };
 }
 
@@ -207,7 +207,7 @@ export function canCreate() {
 export function canEdit() {
   const { role } = getCurrentUser();
 
-  return role === ROLES.ADMINISTRADOR || role === ROLES.EDICION;
+  return role === ROLES.ADMINISTRADOR || role === ROLES.EDITOR;
 }
 
 export function canDelete() {
