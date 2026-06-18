@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+
+k8s/secrets/backend-secret.yaml
+k8s/secrets/mongo-secret.yaml
+*.keytab
