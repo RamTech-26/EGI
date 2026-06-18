@@ -38,11 +38,16 @@ public class InventarioCompletoServiceImpl implements InventarioCompletoService 
         List<HardwareDTO> componentesMock = new ArrayList<>();
         HardwareDTO mock = new HardwareDTO();
         mock.setId("mock-1");
-        mock.setIdEquipo(idEquipo);
+        mock.setFabricante("Intel");
+        mock.setModelo("i7-13700K");
         mock.setTipo("CPU");
-        mock.setMarca("Intel");
-        mock.setModelo("i7");
-        mock.setEstado("Operativo");
+        mock.setCpu("Intel Core i7");
+        mock.setRam("16GB");
+        mock.setDisco("512GB SSD");
+        mock.setSistemaOperativo("Windows 11");
+        mock.setMonitor("24 pulgadas");
+        mock.setMouse("Óptico");
+        mock.setTeclado("Mecánico");
         componentesMock.add(mock);
 
         InventarioCompletoDTO dto = new InventarioCompletoDTO();
