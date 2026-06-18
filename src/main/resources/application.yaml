@@ -1,6 +1,27 @@
 spring:
   application:
     name: backend-api
+  datasource:
+    url: jdbc:sqlserver://<IP>:1433;databaseName=<BD>;encrypt=false;trustServerCertificate=true
+    username: ${SQL_USERNAME}
+    password: ${SQL_PASSWORD}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
   data:
     mongodb:
-      uri: mongodb://localhost:27017/inventario
+      uri: ${MONGO_URI}
+  ldap:
+    urls: ldap://${LDAP_HOST}:${LDAP_PORT}
+    base: ${LDAP_BASE}
+    username: ${LDAP_USER}
+    password: ${LDAP_PASSWORD}
+    java:
+      security:
+        krb5:
+          conf: ${KRB5_CONF}
+        auth:
+          login:
+            config: ${LOGIN_CONF}
