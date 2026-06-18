@@ -1,18 +1,25 @@
+# Plantilla - Copiar a application.yaml y definir las variables de entorno
 spring:
   application:
     name: backend-api
   datasource:
-    url: jdbc:sqlserver://<IP>:1433;databaseName=<NOMBRE_BD>;encrypt=false;trustServerCertificate=true
-    username: <USUARIO>
-    password: <PASSWORD>
+    url: jdbc:sqlserver://<IP>:1433;databaseName=<BD>;encrypt=false;trustServerCertificate=true
+    username: ${SQL_USERNAME}
+    password: ${SQL_PASSWORD}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-    spring:
   ldap:
-    urls: ldap://<IP_WAN_PFSENSE>:389
-    base: dc=itu,dc=local
-    username: cn=svc_backend,cn=Users,dc=itu,dc=local
-    password: <PASSWORD_SERVICIO>
+    urls: ldap://${LDAP_HOST}:${LDAP_PORT}
+    base: ${LDAP_BASE}
+    username: ${LDAP_USER}
+    password: ${LDAP_PASSWORD}
+  java:
+    security:
+      krb5:
+        conf: ${KRB5_CONF}
+      auth:
+        login:
+          config: ${LOGIN_CONF}
