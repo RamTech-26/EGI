@@ -1,47 +1,101 @@
 ﻿export const equiposMock = [
   {
-    id_equipo: "PC-001",
-    aula: "Laboratorio 1",
-    banco: 5,
-    responsable: "Prof. Gómez",
-    estado: "Activo",
-    componentes: {
-      fabricante: "HP",
-      modelo: "ProDesk",
-      cpu: "Intel i5",
-      ram: "16GB",
-      disco: "512GB SSD",
-      sistemaOperativo: "Windows 11"
-    }
+    id: 1,
+    codigo: "PC-01",
+    fechaAdquisicion: "2025-03-15",
+    ubicacionId: 1,
+    responsableId: 1
   },
   {
-    id_equipo: "PC-002",
-    aula: "Laboratorio 1",
-    banco: 6,
-    responsable: "Prof. Pérez",
-    estado: "Activo",
-    componentes: {
-      fabricante: "Lenovo",
-      modelo: "ThinkCentre",
-      cpu: "Intel i7",
-      ram: "32GB",
-      disco: "1TB SSD",
-      sistemaOperativo: "Ubuntu 22.04"
-    }
+    id: 2,
+    codigo: "PC-02",
+    fechaAdquisicion: "2025-04-10",
+    ubicacionId: 2,
+    responsableId: 2
   },
   {
-    id_equipo: "PC-003",
-    aula: "Laboratorio 2",
-    banco: 3,
-    responsable: "Téc. Ramírez",
-    estado: "Baja",
-    componentes: {
-      fabricante: "Dell",
-      modelo: "OptiPlex",
-      cpu: "Intel i3",
-      ram: "8GB",
-      disco: "256GB SSD",
-      sistemaOperativo: "Windows 10"
-    }
+    id: 3,
+    codigo: "NOTE-01",
+    fechaAdquisicion: "2024-11-22",
+    ubicacionId: 1,
+    responsableId: 1
   }
 ];
+
+export const ubicacionesMock = [
+  {
+    id: 1,
+    edificio: "Central",
+    area: "LABORATORIO"
+  },
+  {
+    id: 2,
+    edificio: "Anexo",
+    area: "AULA"
+  }
+];
+
+export const responsablesMock = [
+  {
+    id: 1,
+    nombre: "Juan",
+    apellido: "Perez",
+    email: "juan@correo.com",
+    telefono: "123456"
+  },
+  {
+    id: 2,
+    nombre: "Ana",
+    apellido: "Gomez",
+    email: "ana@correo.com",
+    telefono: "456789"
+  }
+];
+
+export const inventarioCompletoMock = {
+  equipo: {
+    id: 1,
+    codigo: "PC-01",
+    fechaAdquisicion: "2025-03-15",
+    ubicacionId: 1,
+    responsableId: 1
+  },
+  ubicacion: {
+    id: 1,
+    edificio: "Central",
+    area: "LABORATORIO"
+  },
+  responsable: {
+    id: 1,
+    nombre: "Juan",
+    apellido: "Perez",
+    email: "juan@correo.com",
+    telefono: "123456"
+  },
+  componentes: [
+    {
+      id: "mock-1",
+      idEquipo: 1,
+      tipo: "CPU",
+      marca: "Intel",
+      modelo: "i7",
+      estado: "Operativo"
+    },
+    {
+      id: "mock-2",
+      idEquipo: 1,
+      tipo: "RAM",
+      marca: "Kingston",
+      modelo: "16GB DDR4",
+      estado: "Operativo"
+    },
+    {
+      id: "mock-3",
+      idEquipo: 1,
+      tipo: "Disco",
+      marca: "Western Digital",
+      modelo: "512GB SSD",
+      estado: "Operativo"
+    }
+  ]
+};

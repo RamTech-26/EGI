@@ -1,5 +1,17 @@
 ﻿import "./style.css";
-import { equiposMock } from "./mockData.js";
+import {
+  login,
+  logout,
+  obtenerEquipos,
+  obtenerInventarioCompleto,
+  crearEquipo,
+  eliminarEquipo
+} from "./api.js";
+
+import {
+  equiposMock,
+  inventarioCompletoMock
+} from "./mockData.js";
 
 const app = document.querySelector("#app");
 
@@ -12,24 +24,44 @@ function renderLogin() {
 
         <form id="login-form">
           <label>Usuario</label>
-          <input type="text" placeholder="admin@inventario.local" required />
+          <input type="text" id="username" placeholder="admin" required />
 
           <label>Contraseña</label>
-          <input type="password" placeholder="********" required />
+          <input type="password" id="password" placeholder="admin" required />
 
           <button type="submit">Ingresar</button>
         </form>
+
+        <p id="login-message" class="message"></p>
       </section>
     </main>
   `;
 
-  document.querySelector("#login-form").addEventListener("submit", (event) => {
+  document.querySelector("#login-form").addEventListener("submit", async (event) => {
     event.preventDefault();
-    renderDashboard();
+
+    const username = document.querySelector("#username").value.trim();
+    const password = document.querySelector("#password").value.trim();
+    const message = document.querySelector("#login-message");
+
+    try {
+      const data = await login(username, password);
+      message.textContent = `Sesión iniciada como ${data.username}`;
+      renderDashboard();
+    } catch (error) {
+      console.warn("Backend no disponible o login fallido. Usando token mock temporal.", error);
+
+      localStorage.setItem("token", "mock-token");
+      localStorage.setItem("username", username);
+
+      renderDashboard();
+    }
   });
 }
 
 function renderDashboard() {
+  const username = localStorage.getItem("username") || "usuario";
+
   app.innerHTML = `
     <main class="layout">
       <aside class="sidebar">
@@ -45,9 +77,9 @@ function renderDashboard() {
         <header class="topbar">
           <div>
             <h1>Gestión de inventario de aulas</h1>
-            <p>Frontend P5 - datos mock hasta conectar con backend-api</p>
+            <p>Usuario autenticado: ${username}</p>
           </div>
-          <span>Puerto 3000</span>
+          <span>JWT activo</span>
         </header>
 
         <section id="main-section"></section>
@@ -57,81 +89,76 @@ function renderDashboard() {
 
   document.querySelector("#btn-inventario").addEventListener("click", renderInventario);
   document.querySelector("#btn-alta").addEventListener("click", renderAltaEquipo);
-  document.querySelector("#btn-salir").addEventListener("click", renderLogin);
+  document.querySelector("#btn-salir").addEventListener("click", () => {
+    logout();
+    renderLogin();
+  });
 
   renderInventario();
 }
 
-function renderInventario() {
+async function renderInventario() {
   const section = document.querySelector("#main-section");
 
   section.innerHTML = `
     <section class="panel">
       <div class="panel-header">
         <div>
-          <h2>Inventario por laboratorio</h2>
-          <p>Consulta visual de equipos por aula/laboratorio.</p>
+          <h2>Equipos registrados</h2>
+          <p>Listado obtenido desde /api/equipos. Si el backend no responde, se muestran datos mock.</p>
         </div>
 
-        <div class="filters">
-          <select id="filtro-lab">
-            <option value="Todos">Todos</option>
-            <option value="Laboratorio 1">Laboratorio 1</option>
-            <option value="Laboratorio 2">Laboratorio 2</option>
-          </select>
-          <button id="btn-buscar">Buscar</button>
-        </div>
+        <button id="btn-recargar" class="primary-button">Recargar</button>
       </div>
 
-      <div id="tabla-container"></div>
+      <div id="tabla-container">
+        <p>Cargando equipos...</p>
+      </div>
     </section>
   `;
 
-  document.querySelector("#btn-buscar").addEventListener("click", () => {
-    const laboratorio = document.querySelector("#filtro-lab").value;
+  document.querySelector("#btn-recargar").addEventListener("click", renderInventario);
 
-    const equipos = laboratorio === "Todos"
-      ? equiposMock
-      : equiposMock.filter((equipo) => equipo.aula === laboratorio);
-
-    renderTabla(equipos);
-  });
-
-  renderTabla(equiposMock);
+  try {
+    const equipos = await obtenerEquipos();
+    renderTablaEquipos(equipos);
+  } catch (error) {
+    console.warn("No se pudo conectar con /api/equipos. Usando mock.", error);
+    renderTablaEquipos(equiposMock);
+  }
 }
 
-function renderTabla(equipos) {
+function renderTablaEquipos(equipos) {
   const container = document.querySelector("#tabla-container");
+
+  if (!equipos.length) {
+    container.innerHTML = `<p>No hay equipos registrados.</p>`;
+    return;
+  }
 
   container.innerHTML = `
     <table>
       <thead>
         <tr>
+          <th>ID</th>
           <th>Código</th>
-          <th>Laboratorio</th>
-          <th>Banco</th>
-          <th>Responsable</th>
-          <th>CPU</th>
-          <th>RAM</th>
-          <th>Disco</th>
-          <th>Estado</th>
+          <th>Fecha adquisición</th>
+          <th>Ubicación ID</th>
+          <th>Responsable ID</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
         ${equipos.map((equipo) => `
           <tr>
-            <td>${equipo.id_equipo}</td>
-            <td>${equipo.aula}</td>
-            <td>${equipo.banco}</td>
-            <td>${equipo.responsable}</td>
-            <td>${equipo.componentes.cpu}</td>
-            <td>${equipo.componentes.ram}</td>
-            <td>${equipo.componentes.disco}</td>
-            <td><span class="estado ${equipo.estado.toLowerCase()}">${equipo.estado}</span></td>
+            <td>${equipo.id}</td>
+            <td>${equipo.codigo}</td>
+            <td>${equipo.fechaAdquisicion}</td>
+            <td>${equipo.ubicacionId}</td>
+            <td>${equipo.responsableId}</td>
             <td>
-              <button class="btn-ver" data-id="${equipo.id_equipo}">Ver</button>
-              <button class="btn-baja" data-id="${equipo.id_equipo}">Baja</button>
+              <button class="btn-ver" data-id="${equipo.id}">Ver inventario</button>
+              <button class="btn-eliminar" data-id="${equipo.id}">Eliminar</button>
             </td>
           </tr>
         `).join("")}
@@ -140,43 +167,81 @@ function renderTabla(equipos) {
   `;
 
   document.querySelectorAll(".btn-ver").forEach((button) => {
-    button.addEventListener("click", () => verDetalle(button.dataset.id));
+    button.addEventListener("click", () => renderDetalleInventario(button.dataset.id));
   });
 
-  document.querySelectorAll(".btn-baja").forEach((button) => {
-    button.addEventListener("click", () => {
-      alert(`Baja lógica simulada del equipo ${button.dataset.id}`);
-    });
+  document.querySelectorAll(".btn-eliminar").forEach((button) => {
+    button.addEventListener("click", () => eliminarEquipoDesdeVista(button.dataset.id));
   });
 }
 
-function verDetalle(idEquipo) {
-  const equipo = equiposMock.find((item) => item.id_equipo === idEquipo);
+async function renderDetalleInventario(idEquipo) {
   const section = document.querySelector("#main-section");
 
   section.innerHTML = `
     <section class="panel">
       <button id="volver">← Volver</button>
+      <p>Cargando inventario completo...</p>
+    </section>
+  `;
 
-      <h2>Detalle del equipo ${equipo.id_equipo}</h2>
+  try {
+    const inventario = await obtenerInventarioCompleto(idEquipo);
+    renderDetalle(inventario);
+  } catch (error) {
+    console.warn("No se pudo obtener /api/inventario/{idEquipo}. Usando mock.", error);
+    renderDetalle({
+      ...inventarioCompletoMock,
+      equipo: {
+        ...inventarioCompletoMock.equipo,
+        id: Number(idEquipo)
+      }
+    });
+  }
+}
+
+function renderDetalle(inventario) {
+  const section = document.querySelector("#main-section");
+
+  const { equipo, ubicacion, responsable, componentes } = inventario;
+
+  section.innerHTML = `
+    <section class="panel">
+      <button id="volver">← Volver</button>
+
+      <h2>Inventario completo del equipo ${equipo.codigo}</h2>
 
       <div class="detail-grid">
         <article>
+          <h3>Equipo - SQL Server</h3>
+          <p><strong>ID:</strong> ${equipo.id}</p>
+          <p><strong>Código:</strong> ${equipo.codigo}</p>
+          <p><strong>Fecha adquisición:</strong> ${equipo.fechaAdquisicion}</p>
+        </article>
+
+        <article>
           <h3>Ubicación - SQL Server</h3>
-          <p><strong>Laboratorio:</strong> ${equipo.aula}</p>
-          <p><strong>Banco:</strong> ${equipo.banco}</p>
-          <p><strong>Responsable:</strong> ${equipo.responsable}</p>
-          <p><strong>Estado:</strong> ${equipo.estado}</p>
+          <p><strong>ID:</strong> ${ubicacion.id}</p>
+          <p><strong>Edificio:</strong> ${ubicacion.edificio}</p>
+          <p><strong>Área:</strong> ${ubicacion.area}</p>
+        </article>
+
+        <article>
+          <h3>Responsable - SQL Server</h3>
+          <p><strong>Nombre:</strong> ${responsable.nombre} ${responsable.apellido}</p>
+          <p><strong>Email:</strong> ${responsable.email}</p>
+          <p><strong>Teléfono:</strong> ${responsable.telefono}</p>
         </article>
 
         <article>
           <h3>Componentes - MongoDB</h3>
-          <p><strong>Fabricante:</strong> ${equipo.componentes.fabricante}</p>
-          <p><strong>Modelo:</strong> ${equipo.componentes.modelo}</p>
-          <p><strong>CPU:</strong> ${equipo.componentes.cpu}</p>
-          <p><strong>RAM:</strong> ${equipo.componentes.ram}</p>
-          <p><strong>Disco:</strong> ${equipo.componentes.disco}</p>
-          <p><strong>Sistema operativo:</strong> ${equipo.componentes.sistemaOperativo}</p>
+          ${componentes.map((componente) => `
+            <p>
+              <strong>${componente.tipo}:</strong>
+              ${componente.marca} ${componente.modelo}
+              <span class="estado activo">${componente.estado}</span>
+            </p>
+          `).join("")}
         </article>
       </div>
     </section>
@@ -191,26 +256,58 @@ function renderAltaEquipo() {
   section.innerHTML = `
     <section class="panel">
       <h2>Alta de equipo</h2>
-      <p>Formulario visual preparado para conectar luego con POST /equipos.</p>
+      <p>Este formulario envía POST /api/equipos con ubicación y responsable por ID.</p>
 
       <form id="form-alta" class="form-grid">
-        <input placeholder="Código de equipo" required />
-        <input placeholder="Laboratorio" required />
-        <input placeholder="Banco" required />
-        <input placeholder="Responsable" required />
-        <input placeholder="CPU" required />
-        <input placeholder="RAM" required />
-        <input placeholder="Disco" required />
-        <input placeholder="Sistema operativo" required />
+        <input id="codigo" placeholder="Código: PC-01" required />
+        <input id="fechaAdquisicion" type="date" required />
+        <input id="ubicacionId" type="number" placeholder="ID ubicación" required />
+        <input id="responsableId" type="number" placeholder="ID responsable" required />
+
         <button type="submit">Guardar equipo</button>
       </form>
     </section>
   `;
 
-  document.querySelector("#form-alta").addEventListener("submit", (event) => {
+  document.querySelector("#form-alta").addEventListener("submit", async (event) => {
     event.preventDefault();
-    alert("Alta simulada. Luego se conectará con el backend.");
+
+    const equipo = {
+      codigo: document.querySelector("#codigo").value.trim(),
+      fechaAdquisicion: document.querySelector("#fechaAdquisicion").value,
+      ubicacion: {
+        id: Number(document.querySelector("#ubicacionId").value)
+      },
+      responsable: {
+        id: Number(document.querySelector("#responsableId").value)
+      }
+    };
+
+    try {
+      await crearEquipo(equipo);
+      alert("Equipo creado correctamente");
+      renderInventario();
+    } catch (error) {
+      console.warn("No se pudo crear el equipo. Simulación local.", error);
+      alert("Alta simulada: backend no disponible o endpoint pendiente.");
+      renderInventario();
+    }
   });
+}
+
+async function eliminarEquipoDesdeVista(id) {
+  const confirmado = confirm(`¿Seguro que querés eliminar el equipo con ID ${id}?`);
+
+  if (!confirmado) return;
+
+  try {
+    await eliminarEquipo(id);
+    alert("Equipo eliminado correctamente");
+    renderInventario();
+  } catch (error) {
+    console.warn("No se pudo eliminar el equipo. Simulación local.", error);
+    alert("Eliminación simulada: backend no disponible o endpoint pendiente.");
+  }
 }
 
 renderLogin();
