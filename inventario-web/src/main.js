@@ -19,20 +19,31 @@ function renderLogin() {
   app.innerHTML = `
     <main class="login-page">
       <section class="login-card">
-        <h1>Inventario EGI</h1>
-        <p>Ecosistema de Inventario Seguro</p>
+        <div class="login-logo-box">
+          <img src="/logo-uncuyo-itu.png" alt="UNCuyo ITU Virtual" class="login-logo" />
+        </div>
 
-        <form id="login-form">
-          <label>Usuario</label>
+        <div class="login-title-box">
+          <h1>Inventario EGI</h1>
+          <p>Sistema de inventario seguro para aulas y laboratorios</p>
+        </div>
+
+        <form id="login-form" class="login-form">
+          <label for="username">Usuario</label>
           <input type="text" id="username" placeholder="admin" required />
 
-          <label>Contraseña</label>
+          <label for="password">Contraseña</label>
           <input type="password" id="password" placeholder="admin" required />
 
-          <button type="submit">Ingresar</button>
+          <button type="submit">Acceder</button>
         </form>
 
         <p id="login-message" class="message"></p>
+
+        <div class="login-footer">
+          <span>Frontend P5</span>
+          <span>JWT + Backend API</span>
+        </div>
       </section>
     </main>
   `;
@@ -58,7 +69,6 @@ function renderLogin() {
     }
   });
 }
-
 function renderDashboard() {
   const username = localStorage.getItem("username") || "usuario";
 
@@ -311,3 +321,4 @@ async function eliminarEquipoDesdeVista(id) {
 }
 
 renderLogin();
+
