@@ -6,9 +6,9 @@ metadata:
 spec:
   ports:
     - protocol: TCP
-      port: 636
-      targetPort: 636
-  type: ClusterIP
+      port: 389
+      targetPort: 389
+  type: Cluster0IP
 ---
 apiVersion: v1
 kind: Endpoints
@@ -17,6 +17,6 @@ metadata:
   namespace: inventario
 subsets:
   - addresses:
-      - ip: 0.0.0.0   # reemplazar con IP real de la VM AD
+      - ip: 10.10.10.10
     ports:
-      - port: 636
+      - port: 389

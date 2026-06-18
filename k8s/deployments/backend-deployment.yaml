@@ -21,27 +21,83 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: MONGO_USER
+            # Credenciales SQL (desde Secret)
+            - name: SQL_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: mongo-secret
-                  key: MONGO_USER
-            - name: MONGO_PASS
+                  name: backend-secret
+                  key: SQL_USERNAME
+            - name: SQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mongo-secret
-                  key: MONGO_PASS
-            - name: MONGO_HOST
-              value: "inventario-db"
-            - name: MONGO_PORT
-              value: "27017"
-            - name: MONGO_DB
-              value: "inventario"
-            - name: SQL_HOST
-              value: "ubicacion-db"
-            - name: SQL_PORT
-              value: "1433"
+                  name: backend-secret
+                  key: SQL_PASSWORD
+            # Credenciales LDAP (desde Secret)
+            - name: LDAP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_USER
+            - name: LDAP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_PASSWORD
+            # Config no sensible (desde ConfigMap)
             - name: LDAP_HOST
-              value: "ldap-service"
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_HOST
             - name: LDAP_PORT
-              value: "636"
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_PORT
+            - name: LDAP_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_BASE
+            - name: KRB5_CONF
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: KRB5_CONF
+            - name: LOGIN_CONF
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LOGIN_CONF
+            - name: SQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_HOST
+            - name: SQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_PORT
+            - name: SQL_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_DB
+          volumeMounts:
+            - name: krb5-config-vol
+              mountPath: /etc/krb5.conf
+              subPath: krb5.conf
+            - name: krb5-config-vol
+              mountPath: /etc/login.conf
+              subPath: login.conf
+            - name: keytab-vol
+              mountPath: /etc/krb5.keytab
+              subPath: krb5.keytab
+      volumes:
+        - name: krb5-config-vol
+          configMap:
+            name: krb5-config
+        - name: keytab-vol
+          secret:
+            secretName: krb5-keytab

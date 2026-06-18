@@ -17,6 +17,6 @@ metadata:
   namespace: inventario
 subsets:
   - addresses:
-      - ip: 0.0.0.0   # reemplazar con IP real de la VM SQL Server
+      - ip: 10.10.10.20
     ports:
       - port: 1433

@@ -24,4 +24,4 @@ spec:
         - protocol: TCP
           port: 1433
         - protocol: TCP
-          port: 636
+          port: 389
