@@ -2,13 +2,11 @@ package com.inventario.backendapi.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ldap.core.LdapTemplate;
-import org.springframework.ldap.core.support.LdapContextSource;
 import org.springframework.ldap.filter.EqualsFilter;
 import org.springframework.ldap.filter.AndFilter;
 import org.springframework.ldap.core.AttributesMapper;
 import org.springframework.stereotype.Service;
 import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -20,9 +18,9 @@ public class LdapAuthService {
 
     public boolean autenticar(String username, String password) {
         try {
-            LdapContextSource contextSource = (LdapContextSource) ldapTemplate.getContextSource();
-            contextSource.getContext(
-                    "cn=" + username + ",cn=Users,dc=itu,dc=local",
+            ldapTemplate.authenticate(
+                    org.springframework.ldap.query.LdapQueryBuilder.query()
+                            .where("cn").is(username),
                     password
             );
             return true;
@@ -32,9 +30,11 @@ public class LdapAuthService {
     }
 
     public List<String> obtenerGrupos(String username) {
+        String userDn = "cn=" + username + ",cn=Users,dc=itu,dc=local";
+
         AndFilter filter = new AndFilter();
-        filter.and(new EqualsFilter("objectclass", "group"));
-        filter.and(new EqualsFilter("member", "cn=" + username + ",cn=Users,dc=itu,dc=local"));
+        filter.and(new EqualsFilter("objectClass", "group"));
+        filter.and(new EqualsFilter("member", userDn));
 
         return ldapTemplate.search(
                 "dc=itu,dc=local",
@@ -52,11 +52,11 @@ public class LdapAuthService {
     public List<String> convertirGruposARoles(List<String> gruposAD) {
         List<String> roles = new ArrayList<>();
         for (String grupo : gruposAD) {
-            if (grupo.equalsIgnoreCase("Profesores")) {
+            if (grupo.equalsIgnoreCase("GRP_LECTOR")) {
                 roles.add("LECTOR");
-            } else if (grupo.equalsIgnoreCase("Responsables")) {
+            } else if (grupo.equalsIgnoreCase("GRP_EDITOR")) {
                 roles.add("EDITOR");
-            } else if (grupo.equalsIgnoreCase("Administradores")) {
+            } else if (grupo.equalsIgnoreCase("GRP_ADMINISTRADOR")) {
                 roles.add("ADMINISTRADOR");
             }
         }
