@@ -4,11 +4,9 @@ metadata:
   name: app-config
   namespace: inventario
 data:
-  LDAP_HOST: "10.10.10.10"
+  LDAP_HOST: "ldap-service"
   LDAP_PORT: "389"
   LDAP_BASE: "dc=itu,dc=local"
-  KRB5_CONF: "/etc/krb5.conf"
-  LOGIN_CONF: "/etc/login.conf"
   SQL_HOST: "ubicacion-db"
   SQL_PORT: "1433"
   SQL_DB: "InventarioITU"

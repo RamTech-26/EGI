@@ -59,16 +59,6 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: LDAP_BASE
-            - name: KRB5_CONF
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: KRB5_CONF
-            - name: LOGIN_CONF
-              valueFrom:
-                configMapKeyRef:
-                  name: app-config
-                  key: LOGIN_CONF
             - name: SQL_HOST
               valueFrom:
                 configMapKeyRef:
@@ -89,22 +79,4 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: MONGO_URI
-            - name: SPRING_PROFILES_ACTIVE
-              value: "kerberos"
-          volumeMounts:
-            - name: krb5-config-vol
-              mountPath: /etc/krb5.conf
-              subPath: krb5.conf
-            - name: krb5-config-vol
-              mountPath: /etc/login.conf
-              subPath: login.conf
-            - name: keytab-vol
-              mountPath: /etc/krb5.keytab
-              subPath: krb5.keytab
-      volumes:
-        - name: krb5-config-vol
-          configMap:
-            name: krb5-config
-        - name: keytab-vol
-          secret:
-            secretName: krb5-keytab
+
