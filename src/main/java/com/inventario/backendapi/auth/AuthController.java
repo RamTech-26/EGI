@@ -5,6 +5,7 @@ import com.inventario.backendapi.dto.LoginResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.inventario.backendapi.dto.AgregarGrupoRequest;
 
 import java.util.List;
 
@@ -45,5 +46,17 @@ public class AuthController {
         response.setToken(token);
         response.setUsername(username);
         return ResponseEntity.ok(response);
+    }
+    @Autowired
+    private LdapAdminService ldapAdminService;
+
+    @PostMapping("/admin/agregar-grupo")
+    public ResponseEntity<?> agregarUsuarioAGrupo(@RequestBody AgregarGrupoRequest request) {
+        try {
+            ldapAdminService.agregarUsuarioAGrupo(request.getUsername(), request.getGrupo());
+            return ResponseEntity.ok("Usuario " + request.getUsername() + " agregado al grupo " + request.getGrupo());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
     }
 }
