@@ -84,6 +84,13 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: SQL_DB
+            - name: MONGO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: MONGO_URI
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kerberos"
           volumeMounts:
             - name: krb5-config-vol
               mountPath: /etc/krb5.conf
