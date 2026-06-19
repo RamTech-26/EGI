@@ -1,26 +1,21 @@
 # Plantilla de configuración - Copiar a application.yaml y definir las variables de entorno
 spring:
-  profiles:
-    active: kerberos
   application:
     name: backend-api
   datasource:
-    url: jdbc:sqlserver://<IP>:1433;databaseName=<BD>;encrypt=false;trustServerCertificate=true;integratedSecurity=true;authenticationScheme=JavaKerberos
+    url: jdbc:sqlserver://<IP>:1433;databaseName=<BD>;encrypt=false;trustServerCertificate=true
     username: ${SQL_USERNAME}
     password: ${SQL_PASSWORD}
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
   ldap:
     urls: ldap://${LDAP_HOST}:${LDAP_PORT}
     base: ${LDAP_BASE}
     username: ${LDAP_USER}
     password: ${LDAP_PASSWORD}
-  java:
-    security:
-      krb5:
-        conf: ${KRB5_CONF:/etc/krb5.conf}
-      auth:
-        login:
-          config: ${LOGIN_CONF:/etc/login.conf}
 
 mongo:
   service:
