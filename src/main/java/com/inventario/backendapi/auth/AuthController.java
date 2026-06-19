@@ -13,31 +13,37 @@ import java.util.List;
 public class AuthController {
 
     @Autowired
-    private LdapAuthService ldapAuthService;
+    private JwtUtil jwtUtil;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private LdapAuthService ldapAuthService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        // Validar credenciales contra AD vía LDAP
-        if (!ldapAuthService.autenticar(request.getUsername(), request.getPassword())) {
+        String username = request.getUsername();
+        String password = request.getPassword();
+
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
             return ResponseEntity.status(401).body("Credenciales inválidas");
         }
 
-        // Obtener grupos del usuario desde AD
-        List<String> gruposAD = ldapAuthService.obtenerGrupos(request.getUsername());
+        boolean autenticado = ldapAuthService.autenticar(username, password);
 
-        // Convertir grupos AD a roles de aplicación
+        if (!autenticado) {
+            return ResponseEntity.status(401).body("Credenciales inválidas");
+        }
+
+        List<String> gruposAD = ldapAuthService.obtenerGrupos(username);
         List<String> roles = ldapAuthService.convertirGruposARoles(gruposAD);
 
-        // Generar token JWT con username y roles
-        String token = jwtUtil.generarToken(request.getUsername(), roles);
+        if (roles.isEmpty()) {
+            return ResponseEntity.status(403).body("Usuario sin rol asignado");
+        }
 
+        String token = jwtUtil.generarToken(username, roles);
         LoginResponse response = new LoginResponse();
         response.setToken(token);
-        response.setUsername(request.getUsername());
-
+        response.setUsername(username);
         return ResponseEntity.ok(response);
     }
 }

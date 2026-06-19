@@ -23,21 +23,26 @@ public class LdapAuthService {
                             .where("cn").is(username),
                     password
             );
+            System.out.println("LDAP AUTH OK para: " + username);
             return true;
         } catch (Exception e) {
+            System.out.println("LDAP AUTH FALLO para: " + username);
+            System.out.println("Tipo de excepción: " + e.getClass().getName());
+            System.out.println("Mensaje: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
 
     public List<String> obtenerGrupos(String username) {
-        String userDn = "cn=" + username + ",cn=Users,dc=itu,dc=local";
+        String userDn = "CN=" + username + ",OU=Usuarios,OU=EGI,DC=itu,DC=local";
 
         AndFilter filter = new AndFilter();
         filter.and(new EqualsFilter("objectClass", "group"));
         filter.and(new EqualsFilter("member", userDn));
 
         return ldapTemplate.search(
-                "dc=itu,dc=local",
+                "",
                 filter.encode(),
                 (AttributesMapper<String>) attrs -> {
                     try {
