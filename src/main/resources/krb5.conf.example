@@ -1,9 +1,5 @@
 # Plantilla de configuración Kerberos
 # Copiar a krb5.conf y reemplazar los placeholders con los datos del AD
-# Ejemplo:
-#   realm = ITU.LOCAL
-#   kdc = ip_o_hostname_del_controlador_de_dominio
-
 [libdefaults]
     default_realm = <REALM>
     dns_lookup_realm = false
