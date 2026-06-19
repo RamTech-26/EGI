@@ -1,11 +1,9 @@
 ﻿import "./style.css";
 
 import {
-  ROLES,
   ApiError,
   login,
   logout,
-  setMockSession,
   getCurrentUser,
   canCreate,
   canEdit,
@@ -19,16 +17,7 @@ import {
   obtenerResponsables
 } from "./api.js";
 
-import {
-  equiposMock,
-  ubicacionesMock,
-  responsablesMock,
-  obtenerInventarioMockPorId
-} from "./mockData.js";
-
 const app = document.querySelector("#app");
-
-let modoConexion = "API";
 
 function getRoleLabel(role) {
   const labels = {
@@ -38,6 +27,17 @@ function getRoleLabel(role) {
   };
 
   return labels[role] || "Sin rol";
+}
+
+function mostrarErrorSesion(error) {
+  if (error instanceof ApiError && error.status === 401) {
+    alert("La sesión venció o el token no es válido. Volvé a iniciar sesión.");
+    logout();
+    renderLogin();
+    return true;
+  }
+
+  return false;
 }
 
 function renderLogin() {
@@ -65,10 +65,6 @@ function renderLogin() {
 
         <p id="login-message" class="message"></p>
 
-        <div class="login-help">
-          <p><strong>Modo prueba:</strong> admin = administrador, editor = edición, ana = lectura.</p>
-        </div>
-
         <div class="login-footer">
           <span>Inventario SITU</span>
           <span>JWT + Active Directory</span>
@@ -86,20 +82,17 @@ function renderLogin() {
 
     try {
       await login(username, password);
-      modoConexion = "API";
       renderDashboard();
     } catch (error) {
-      if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-        message.className = "message error-message";
+      message.className = "message error-message";
+
+      if (error instanceof ApiError) {
         message.textContent = error.message;
         return;
       }
 
-      console.warn("Backend no disponible. Se utiliza modo demostración.", error);
-
-      setMockSession(username || "ana");
-      modoConexion = "DEMO";
-      renderDashboard();
+      message.textContent = "No se pudo conectar con el backend. Verificá que la API esté corriendo.";
+      console.error("Error de conexión con backend:", error);
     }
   });
 }
@@ -127,7 +120,7 @@ function renderDashboard() {
               Rol: ${getRoleLabel(currentUser.role)}
             </p>
           </div>
-          <span>${modoConexion === "API" ? "Conectado a API" : "Modo demostración"}</span>
+          <span>Conectado a API</span>
         </header>
 
         <section id="main-section"></section>
@@ -178,24 +171,24 @@ async function renderInventario() {
 
   try {
     const equipos = await obtenerEquipos();
-    modoConexion = "API";
     renderTablaEquipos(equipos);
   } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      alert("La sesión venció o el token no es válido. Volvé a iniciar sesión.");
-      logout();
-      renderLogin();
-      return;
-    }
+    if (mostrarErrorSesion(error)) return;
 
     if (error instanceof ApiError && error.status === 403) {
-      alert("No tenés permisos para consultar el inventario.");
+      document.querySelector("#tabla-container").innerHTML = `
+        <p class="error-message">No tenés permisos para consultar el inventario.</p>
+      `;
       return;
     }
 
-    console.warn("No se pudo conectar con /api/equipos. Se muestran datos de demostración.", error);
-    modoConexion = "DEMO";
-    renderTablaEquipos(equiposMock);
+    document.querySelector("#tabla-container").innerHTML = `
+      <p class="error-message">
+        No se pudo conectar con el backend. Verificá que la API esté corriendo en http://localhost:8080.
+      </p>
+    `;
+
+    console.error("Error al obtener equipos:", error);
   }
 }
 
@@ -287,25 +280,23 @@ async function renderDetalleInventario(idEquipo) {
 
   try {
     const inventario = await obtenerInventarioCompleto(idEquipo);
-    modoConexion = "API";
     renderDetalle(inventario);
   } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      alert("La sesión venció o el token no es válido. Volvé a iniciar sesión.");
-      logout();
-      renderLogin();
-      return;
-    }
+    if (mostrarErrorSesion(error)) return;
 
-    if (error instanceof ApiError && error.status === 403) {
-      alert("No tenés permisos para ver este detalle.");
-      renderInventario();
-      return;
-    }
+    const mensaje = error instanceof ApiError && error.status === 403
+      ? "No tenés permisos para ver este detalle."
+      : "No se pudo cargar el inventario completo desde el backend.";
 
-    console.warn("No se pudo obtener /api/inventario/{idEquipo}. Se muestran datos de demostración.", error);
-    modoConexion = "DEMO";
-    renderDetalle(obtenerInventarioMockPorId(idEquipo));
+    section.innerHTML = `
+      <section class="panel">
+        <button id="volver">← Volver al listado</button>
+        <p class="error-message">${mensaje}</p>
+      </section>
+    `;
+
+    document.querySelector("#volver").addEventListener("click", renderInventario);
+    console.error("Error al obtener detalle:", error);
   }
 }
 
@@ -366,9 +357,15 @@ async function cargarSelects(selectUbicacion, selectResponsable) {
     const responsables = await obtenerResponsables();
 
     llenarSelects(selectUbicacion, selectResponsable, ubicaciones, responsables);
+    return true;
   } catch (error) {
-    console.warn("No se pudieron cargar ubicaciones/responsables. Se utilizan datos de demostración.", error);
-    llenarSelects(selectUbicacion, selectResponsable, ubicacionesMock, responsablesMock);
+    if (mostrarErrorSesion(error)) return false;
+
+    selectUbicacion.innerHTML = `<option value="">No se pudieron cargar ubicaciones</option>`;
+    selectResponsable.innerHTML = `<option value="">No se pudieron cargar responsables</option>`;
+
+    console.error("Error al cargar ubicaciones/responsables:", error);
+    return false;
   }
 }
 
@@ -426,7 +423,12 @@ async function renderAltaEquipo() {
   const selectUbicacion = document.querySelector("#ubicacionId");
   const selectResponsable = document.querySelector("#responsableId");
 
-  await cargarSelects(selectUbicacion, selectResponsable);
+  const selectsCargados = await cargarSelects(selectUbicacion, selectResponsable);
+
+  if (!selectsCargados) {
+    document.querySelector("#form-alta button").disabled = true;
+    return;
+  }
 
   document.querySelector("#form-alta").addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -447,14 +449,15 @@ async function renderAltaEquipo() {
       alert("Equipo registrado correctamente");
       renderInventario();
     } catch (error) {
+      if (mostrarErrorSesion(error)) return;
+
       if (error instanceof ApiError && error.status === 403) {
         alert("No tenés permisos para crear equipos.");
         return;
       }
 
-      console.warn("No se pudo crear el equipo. Registro simulado.", error);
-      alert("Registro simulado: backend no disponible o endpoint pendiente.");
-      renderInventario();
+      alert("No se pudo registrar el equipo. Verificá el backend.");
+      console.error("Error al crear equipo:", error);
     }
   });
 }
@@ -471,8 +474,12 @@ async function renderEditarEquipo(idEquipo) {
   try {
     inventario = await obtenerInventarioCompleto(idEquipo);
   } catch (error) {
-    console.warn("No se pudo obtener el equipo desde API para editar. Se utiliza mock.", error);
-    inventario = obtenerInventarioMockPorId(idEquipo);
+    if (mostrarErrorSesion(error)) return;
+
+    alert("No se pudo cargar el equipo para editar.");
+    console.error("Error al cargar equipo para editar:", error);
+    renderInventario();
+    return;
   }
 
   const equipo = inventario.equipo;
@@ -508,7 +515,12 @@ async function renderEditarEquipo(idEquipo) {
   const selectUbicacion = document.querySelector("#ubicacionId");
   const selectResponsable = document.querySelector("#responsableId");
 
-  await cargarSelects(selectUbicacion, selectResponsable);
+  const selectsCargados = await cargarSelects(selectUbicacion, selectResponsable);
+
+  if (!selectsCargados) {
+    document.querySelector("#form-editar button").disabled = true;
+    return;
+  }
 
   selectUbicacion.value = equipo.ubicacionId;
   selectResponsable.value = equipo.responsableId;
@@ -532,14 +544,15 @@ async function renderEditarEquipo(idEquipo) {
       alert("Equipo editado correctamente");
       renderInventario();
     } catch (error) {
+      if (mostrarErrorSesion(error)) return;
+
       if (error instanceof ApiError && error.status === 403) {
         alert("No tenés permisos para editar equipos.");
         return;
       }
 
-      console.warn("No se pudo editar el equipo. Edición simulada.", error);
-      alert("Edición simulada: backend no disponible o endpoint pendiente.");
-      renderInventario();
+      alert("No se pudo editar el equipo. Verificá el backend.");
+      console.error("Error al editar equipo:", error);
     }
   });
 }
@@ -559,13 +572,15 @@ async function eliminarEquipoDesdeVista(id) {
     alert("Equipo eliminado correctamente");
     renderInventario();
   } catch (error) {
+    if (mostrarErrorSesion(error)) return;
+
     if (error instanceof ApiError && error.status === 403) {
       alert("No tenés permisos para eliminar equipos.");
       return;
     }
 
-    console.warn("No se pudo eliminar el equipo. Eliminación simulada.", error);
-    alert("Eliminación simulada: backend no disponible o endpoint pendiente.");
+    alert("No se pudo eliminar el equipo. Verificá el backend.");
+    console.error("Error al eliminar equipo:", error);
   }
 }
 
