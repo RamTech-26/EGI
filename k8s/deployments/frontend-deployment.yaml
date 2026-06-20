@@ -18,7 +18,5 @@ spec:
           image: inventario-web:v1
           imagePullPolicy: Never
           ports:
-            - containerPort: 3000
-          env:
-            - name: BACKEND_URL
-              value: "http://backend-api:8080"
+            - containerPort: 80
+
