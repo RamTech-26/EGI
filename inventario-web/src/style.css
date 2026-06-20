@@ -509,3 +509,312 @@ td button:hover,
     flex-direction: column;
   }
 }
+
+/* ROLES Y PERMISOS */
+
+.login-help {
+  margin-top: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.login-help p {
+  margin: 0;
+  color: #475569;
+  font-size: 13px;
+}
+
+.error-message {
+  color: #b91c1c;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.permissions-summary {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0;
+  padding: 12px;
+  background: #f8fcfb;
+  border: 1px solid #d8e1e8;
+  border-radius: 10px;
+}
+
+.permissions-summary strong {
+  color: #1f2937;
+  margin-right: 4px;
+}
+
+.permissions-summary span {
+  display: inline-block;
+  background: #e0f2ef;
+  color: #007765;
+  border: 1px solid rgba(0, 143, 122, 0.18);
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.btn-editar {
+  background: #e0f2ef;
+  color: #007765;
+  border: 1px solid #c9e5e0;
+}
+
+/* ================================
+   PALETA FINAL ITU / UNCuyo
+   Aplica a login + panel interno
+================================ */
+
+:root {
+  --color-primary: #009688;
+  --color-primary-dark: #00796b;
+  --color-primary-soft: #e0f2f1;
+  --color-sidebar: #063f3a;
+  --color-sidebar-dark: #032f2c;
+  --color-red: #e30613;
+  --color-bg: #f3f6f8;
+  --color-card: #ffffff;
+  --color-text: #0f172a;
+  --color-muted: #64748b;
+  --color-border: #dbe3ea;
+}
+
+/* Fondo general del sistema */
+
+body {
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+.layout {
+  background: var(--color-bg) !important;
+}
+
+/* Menú lateral */
+
+.sidebar {
+  background: linear-gradient(180deg, var(--color-sidebar) 0%, var(--color-sidebar-dark) 100%) !important;
+  border-right: 4px solid var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
+.sidebar h2 {
+  color: #ffffff !important;
+}
+
+.sidebar h2::after {
+  background: var(--color-red) !important;
+}
+
+.sidebar p {
+  color: #cce7e3 !important;
+}
+
+.sidebar button {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+
+.sidebar button:hover {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Encabezado interno */
+
+.topbar h1 {
+  color: var(--color-text) !important;
+}
+
+.topbar p {
+  color: var(--color-muted) !important;
+}
+
+.topbar span {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-primary-dark) !important;
+  border: 1px solid rgba(0, 150, 136, 0.25) !important;
+}
+
+/* Paneles */
+
+.panel {
+  background: var(--color-card) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: 0 14px 36px rgba(6, 63, 58, 0.10) !important;
+}
+
+.panel h2 {
+  color: var(--color-text) !important;
+}
+
+.panel h2::after {
+  background: var(--color-red) !important;
+}
+
+.panel p {
+  color: var(--color-muted) !important;
+}
+
+/* Botones principales */
+
+.primary-button,
+.filters button,
+.form-grid button,
+.login-form button {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.primary-button:hover,
+.filters button:hover,
+.form-grid button:hover,
+.login-form button:hover {
+  background: var(--color-primary-dark) !important;
+}
+
+/* Tabla */
+
+table {
+  background: #ffffff !important;
+}
+
+th {
+  background: #f4f8f7 !important;
+  color: #334155 !important;
+  border-bottom: 2px solid var(--color-border) !important;
+}
+
+td {
+  color: var(--color-text) !important;
+}
+
+tbody tr:hover {
+  background: #f8fcfb !important;
+}
+
+/* Botones de acciones */
+
+td button,
+#volver {
+  background: #e0f2f1 !important;
+  color: var(--color-primary-dark) !important;
+  border: 1px solid #b8dfda !important;
+}
+
+td button:hover,
+#volver:hover {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--color-primary) !important;
+}
+
+/* Botón editar */
+
+.btn-editar {
+  background: #e0f2f1 !important;
+  color: var(--color-primary-dark) !important;
+  border: 1px solid #b8dfda !important;
+}
+
+.btn-editar:hover {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+}
+
+/* Botón eliminar */
+
+.btn-eliminar {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fecaca !important;
+}
+
+.btn-eliminar:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #dc2626 !important;
+}
+
+/* Resumen de permisos */
+
+.permissions-summary {
+  background: #f8fcfb !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.permissions-summary span {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-primary-dark) !important;
+  border: 1px solid rgba(0, 150, 136, 0.25) !important;
+}
+
+/* Tarjetas de detalle */
+
+.detail-grid article {
+  background: #f8fcfb !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+.detail-grid h3 {
+  color: var(--color-primary-dark) !important;
+}
+
+/* Formularios */
+
+.form-grid input,
+.form-grid select,
+.login-form input,
+.login-form select {
+  border: 1px solid #b8c7d1 !important;
+  background: #ffffff !important;
+  color: var(--color-text) !important;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.login-form input:focus,
+.login-form select:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(0, 150, 136, 0.15) !important;
+}
+
+/* Estados */
+
+.estado.activo {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-primary-dark) !important;
+}
+
+.estado.baja {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+}
+
+/* Mensajes */
+
+.message {
+  color: var(--color-primary-dark) !important;
+}
+
+.error-message {
+  color: #991b1b !important;
+  background: #fee2e2 !important;
+  border: 1px solid #fecaca !important;
+}
+
+.login-help {
+  background: #f8fcfb !important;
+  border: 1px solid var(--color-border) !important;
+}
+
