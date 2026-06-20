@@ -11,9 +11,10 @@ public class MongoConfig {
 
     @Bean
     public MongoClient mongoClient() {
-        return MongoClients.create(
-                "mongodb://app-inventario:password123@localhost:27017/inventario?authSource=inventario"
-        );
+        String uri = System.getenv("MONGO_URI") != null
+                ? System.getenv("MONGO_URI")
+                : "mongodb://app-inventario:password123@localhost:27017/inventario?authSource=inventario";
+        return MongoClients.create(uri);
     }
 
     @Bean
