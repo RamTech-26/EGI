@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: inventario-web
-          image: inventario-web:v1
-          imagePullPolicy: Never
+          image: ghcr.io/romis2799/inventario-web:v1
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
 
