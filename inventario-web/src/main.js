@@ -1,4 +1,4 @@
-﻿import "./style.css";
+import "./style.css";
 import {
   login,
   logout,
@@ -25,8 +25,8 @@ function renderLogin() {
           <img src="/logo-uncuyo-itu.png" alt="UNCuyo ITU Virtual" class="login-logo" />
         </div>
         <div class="login-title-box">
-          <h1>Inventario EGI</h1>
-          <p>Sistema de inventario seguro para aulas y laboratorios</p>
+          <h1>SITU</h1>
+          <p> Sistema de Inventario Universitario</p>
         </div>
         <form id="login-form" class="login-form">
           <label for="username">Usuario</label>
@@ -36,9 +36,11 @@ function renderLogin() {
           <button type="submit">Acceder</button>
         </form>
         <p id="login-message" class="message"></p>
+
         <div class="login-footer">
-          <span>Frontend P5</span>
-          <span>JWT + Backend API</span>
+  <span>Inventario institucional</span>
+  <span>Acceso seguro por roles</span>
+</div>
         </div>
       </section>
     </main>
@@ -49,12 +51,14 @@ function renderLogin() {
     const username = document.querySelector("#username").value.trim();
     const password = document.querySelector("#password").value.trim();
     const message = document.querySelector("#login-message");
+
+   
     try {
       const data = await login(username, password);
       message.textContent = `Sesión iniciada como ${data.username}`;
       renderDashboard();
     } catch (error) {
-      message.textContent = "Usuario o contraseña incorrectos";
+      message.textContent = "Credenciales inválidas. Verificá usuario, contraseña y rol asignado.";
     }
   });
 }
@@ -66,10 +70,13 @@ function renderDashboard() {
 
   app.innerHTML = `
     <main class="layout">
-      <aside class="sidebar">
-        <h2>EGI</h2>
-        <p>Inventario Seguro</p>
-        <button id="btn-inventario">Inventario</button>
+     <aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="itu-virtual_sidebar.png" alt=" ITU Virtual" class="sidebar-logo" />
+    <h2>SITU</h2>
+    <p>Aulas y Laboratorios</p>
+  </div>
+  <button id="btn-inventario">Inventario</button>
         <button id="btn-alta-equipo">Alta de equipo</button>
         <button id="btn-alta-ubicacion">Alta de ubicación</button>
         <button id="btn-alta-responsable">Alta de responsable</button>
@@ -123,7 +130,7 @@ async function renderInventario() {
     const equipos = await obtenerEquipos();
     renderTablaEquipos(equipos);
   } catch (error) {
-    document.querySelector("#tabla-container").innerHTML = `<p>Error al cargar equipos.</p>`;
+    document.querySelector("#tabla-container").innerHTML = `<p>No se pudieron cargar los equipos. Verificá credenciales o permisos del usuario.</p>`;
   }
 }
 
@@ -134,7 +141,7 @@ function renderTablaEquipos(equipos) {
     return;
   }
   container.innerHTML = `
-    <table>
+    <table class="fixed-table inventory-table">
       <thead>
         <tr>
           <th>ID</th>
@@ -186,7 +193,7 @@ async function renderDetalleInventario(idEquipo) {
     section.innerHTML = `
       <section class="panel">
         <button id="volver">← Volver</button>
-        <p>Error al cargar el inventario del equipo ${idEquipo}.</p>
+        <p>No se pudo cargar el inventario del equipo ${idEquipo}. Verificá credenciales o permisos del usuario.</p>
       </section>
     `;
     document.querySelector("#volver").addEventListener("click", renderInventario);
@@ -317,7 +324,7 @@ async function renderAltaEquipo() {
       alert("Equipo y hardware creados correctamente");
       renderInventario();
     } catch (error) {
-      alert("Error al crear el equipo. Verificá que el código no exista ya.");
+      alert("No se pudo crear el equipo. Verificá credenciales, permisos o que el código no exista.");
     }
   });
 }
@@ -350,7 +357,7 @@ function renderAltaUbicacion() {
       alert("Ubicación creada correctamente");
       renderInventario();
     } catch (error) {
-      alert("Error al crear la ubicación.");
+      alert("No se pudo crear la ubicación. Verificá credenciales o permisos del usuario.");
     }
   });
 }
@@ -382,7 +389,7 @@ function renderAltaResponsable() {
       alert("Responsable creado correctamente");
       renderInventario();
     } catch (error) {
-      alert("Error al crear el responsable.");
+      alert("No se pudo crear el responsable. Verificá credenciales o permisos del usuario.");
     }
   });
 }
@@ -442,19 +449,19 @@ async function renderGestionUsuarios() {
         const username = btn.dataset.username;
         const select = document.querySelector(`.select-rol[data-username="${username}"]`);
         const grupo = select.value;
-        if (!grupo) { alert("Seleccioná un rol"); return; }
+        if (!grupo) { alert("Seleccioná un rol antes de guardar el cambio."); return; }
         try {
           await cambiarRolUsuario(username, grupo);
           alert(`Rol de ${username} actualizado correctamente`);
           renderGestionUsuarios();
         } catch (error) {
-          alert("Error al cambiar el rol.");
+          alert("No se pudo cambiar el rol. Verificá credenciales o permisos de administrador.");
         }
       });
     });
 
   } catch (error) {
-    document.querySelector("#tabla-usuarios").innerHTML = `<p>Error al cargar usuarios.</p>`;
+    document.querySelector("#tabla-usuarios").innerHTML = `<p>No se pudieron cargar los usuarios AD. Verificá credenciales o permisos de administrador.</p>`;
   }
 }
 
@@ -466,7 +473,7 @@ async function eliminarEquipoDesdeVista(id) {
     alert("Equipo eliminado correctamente");
     renderInventario();
   } catch (error) {
-    alert("Error al eliminar el equipo.");
+    alert("No se pudo eliminar el equipo. Verificá credenciales o permisos del usuario.");
   }
 }
 
