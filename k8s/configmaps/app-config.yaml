@@ -14,3 +14,4 @@ data:
   MONGO_PORT: "27017"
   MONGO_DB: "inventario"
   MONGO_URI: "mongodb://app-inventario:password123@inventario-db:27017/inventario?authSource=inventario"
+  MONGO_SERVICE_URL: "http://backend-mongo:8080"

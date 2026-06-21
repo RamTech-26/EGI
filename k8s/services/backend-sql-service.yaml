@@ -5,7 +5,7 @@ metadata:
   namespace: inventario
 spec:
   selector:
-    app: backend-api
+    app: backend-sql
   ports:
     - protocol: TCP
       port: 8080

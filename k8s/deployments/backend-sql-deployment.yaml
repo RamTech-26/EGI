@@ -1,0 +1,232 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-sql
+  namespace: inventario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-sql
+  template:
+    metadata:
+      labels:
+        app: backend-sql
+    spec:
+      serviceAccountName: sa-backend
+      containers:
+        - name: backend-sql
+          image: ghcr.io/romis2799/backend-sql:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_USERNAME
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_PASSWORD
+            - name: LDAP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_USER
+            - name: LDAP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_PASSWORD
+            - name: LDAP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_HOST
+            - name: LDAP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_PORT
+            - name: LDAP_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_BASE
+            - name: SQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_HOST
+            - name: SQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_PORT
+            - name: SQL_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_DB
+            - name: MONGO_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: MONGO_SERVICE_URLapiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-sql
+  namespace: inventario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-sql
+  template:
+    metadata:
+      labels:
+        app: backend-sql
+    spec:
+      serviceAccountName: sa-backend
+      containers:
+        - name: backend-sql
+          image: ghcr.io/romis2799/backend-sql:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_USERNAME
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_PASSWORD
+            - name: LDAP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_USER
+            - name: LDAP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_PASSWORD
+            - name: LDAP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_HOST
+            - name: LDAP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_PORT
+            - name: LDAP_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_BASE
+            - name: SQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_HOST
+            - name: SQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_PORT
+            - name: SQL_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_DB
+            - name: MONGO_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: MONGO_SERVICE_URLapiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-sql
+  namespace: inventario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-sql
+  template:
+    metadata:
+      labels:
+        app: backend-sql
+    spec:
+      serviceAccountName: sa-backend
+      containers:
+        - name: backend-sql
+          image: ghcr.io/romis2799/backend-sql:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_USERNAME
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_PASSWORD
+            - name: LDAP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_USER
+            - name: LDAP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_PASSWORD
+            - name: LDAP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_HOST
+            - name: LDAP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_PORT
+            - name: LDAP_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: LDAP_BASE
+            - name: SQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_HOST
+            - name: SQL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_PORT
+            - name: SQL_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SQL_DB
+            - name: MONGO_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: MONGO_SERVICE_URL
