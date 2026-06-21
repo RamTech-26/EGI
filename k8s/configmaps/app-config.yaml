@@ -15,4 +15,4 @@ data:
   MONGO_DB: "inventario"
   MONGO_URI: "mongodb://app-inventario:password123@inventario-db:27017/inventario?authSource=inventario"
   MONGO_SERVICE_URL: "http://backend-mongo:8080"
-  SPRING_DATASOURCE_URL: "jdbc:sqlserver://172.22.74.186:1433;databaseName=InventarioITU;encrypt=false;trustServerCertificate=true"
+  SPRING_DATASOURCE_URL: "jdbc:sqlserver://192.168.100.239:1433;databaseName=InventarioITU;encrypt=false;trustServerCertificate=true"
