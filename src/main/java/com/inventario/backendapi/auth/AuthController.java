@@ -51,9 +51,9 @@ public class AuthController {
     private LdapAdminService ldapAdminService;
 
     @PostMapping("/admin/agregar-grupo")
-    public ResponseEntity<?> agregarUsuarioAGrupo(@RequestBody AgregarGrupoRequest request) {
+    public ResponseEntity<?> cambiarGrupoUsuario(@RequestBody AgregarGrupoRequest request) {
         try {
-            ldapAdminService.agregarUsuarioAGrupo(request.getUsername(), request.getGrupo());
+            ldapAdminService.cambiarGrupoUsuario(request.getUsername(), request.getGrupo());
             return ResponseEntity.ok("Usuario " + request.getUsername() + " agregado al grupo " + request.getGrupo());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());

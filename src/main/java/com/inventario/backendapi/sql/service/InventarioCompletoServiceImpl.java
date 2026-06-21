@@ -55,4 +55,13 @@ public class InventarioCompletoServiceImpl implements InventarioCompletoService 
 
         return dto;
     }
+    @Override
+    public List<InventarioCompletoDTO> obtenerTodos() throws Exception {
+        List<Equipo> equipos = equipoService.findAll();
+        List<InventarioCompletoDTO> resultado = new java.util.ArrayList<>();
+        for (Equipo equipo : equipos) {
+            resultado.add(obtenerInventarioCompleto(equipo.getId()));
+        }
+        return resultado;
+    }
 }

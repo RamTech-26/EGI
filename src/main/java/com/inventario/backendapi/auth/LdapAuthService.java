@@ -35,7 +35,7 @@ public class LdapAuthService {
     }
 
     public List<String> obtenerGrupos(String username) {
-        String userDn = "CN=" + username + ",OU=Usuarios,OU=EGI,DC=itu,DC=local";
+        String userDn = "CN=" + username + ",CN=Users,DC=itu,DC=local";
 
         AndFilter filter = new AndFilter();
         filter.and(new EqualsFilter("objectClass", "group"));
