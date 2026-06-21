@@ -25,6 +25,9 @@ public class LdapAdminService {
             throw new RuntimeException("DN inválido", e);
         }
 
+        System.out.println("userDn.toString(): " + userDn.toString());
+        System.out.println("newGroupDn.toString(): " + newGroupDn.toString());
+
         List<String> todosLosGrupos = List.of(
                 "CN=GRP_LECTOR,OU=Grupos,OU=EGI,DC=itu,DC=local",
                 "CN=GRP_EDITOR,OU=Grupos,OU=EGI,DC=itu,DC=local",
@@ -34,18 +37,22 @@ public class LdapAdminService {
         for (String groupDnStr : todosLosGrupos) {
             try {
                 javax.naming.ldap.LdapName groupDn = new javax.naming.ldap.LdapName(groupDnStr);
+                System.out.println("Intentando quitar de grupo: " + groupDnStr);
                 org.springframework.ldap.core.DirContextOperations ctx =
                         ldapTemplateAdmin.lookupContext(groupDn);
                 ctx.removeAttributeValue("member", userDn.toString());
                 ldapTemplateAdmin.modifyAttributes(ctx);
+                System.out.println("Quitado de: " + groupDnStr);
             } catch (Exception e) {
-                // Si no era miembro o no existe, ignoramos
+                System.out.println("No estaba en grupo o error: " + groupDnStr + " - " + e.getMessage());
             }
         }
 
+        System.out.println("Agregando a nuevo grupo: " + newGroupDn.toString());
         org.springframework.ldap.core.DirContextOperations ctx =
                 ldapTemplateAdmin.lookupContext(newGroupDn);
         ctx.addAttributeValue("member", userDn.toString());
         ldapTemplateAdmin.modifyAttributes(ctx);
+        System.out.println("Agregado correctamente a: " + grupoCN);
     }
 }

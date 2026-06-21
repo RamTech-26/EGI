@@ -137,5 +137,5 @@ export async function cambiarRolUsuario(username, grupo) {
     body: JSON.stringify({ username, grupo })
   });
   if (!response.ok) throw new Error("No se pudo cambiar el rol");
-  return await response.json();
+  return await response.text();
 }
