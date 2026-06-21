@@ -15,29 +15,37 @@ public class LdapAdminService {
     }
 
     public void cambiarGrupoUsuario(String username, String grupoCN) {
-        String userDn = "CN=" + username + ",CN=Users,DC=itu,DC=local";
+        javax.naming.ldap.LdapName userDn;
+        javax.naming.ldap.LdapName newGroupDn;
+
+        try {
+            userDn = new javax.naming.ldap.LdapName("CN=" + username + ",OU=Usuarios,OU=EGI,DC=itu,DC=local");
+            newGroupDn = new javax.naming.ldap.LdapName("CN=" + grupoCN + ",OU=Grupos,OU=EGI,DC=itu,DC=local");
+        } catch (javax.naming.InvalidNameException e) {
+            throw new RuntimeException("DN inválido", e);
+        }
 
         List<String> todosLosGrupos = List.of(
-                "CN=GRP_LECTOR,CN=Users,DC=itu,DC=local",
-                "CN=GRP_EDITOR,CN=Users,DC=itu,DC=local",
-                "CN=GRP_ADMINISTRADOR,CN=Users,DC=itu,DC=local"
+                "CN=GRP_LECTOR,OU=Grupos,OU=EGI,DC=itu,DC=local",
+                "CN=GRP_EDITOR,OU=Grupos,OU=EGI,DC=itu,DC=local",
+                "CN=GRP_ADMINISTRADOR,OU=Grupos,OU=EGI,DC=itu,DC=local"
         );
 
-        for (String groupDn : todosLosGrupos) {
+        for (String groupDnStr : todosLosGrupos) {
             try {
+                javax.naming.ldap.LdapName groupDn = new javax.naming.ldap.LdapName(groupDnStr);
                 org.springframework.ldap.core.DirContextOperations ctx =
                         ldapTemplateAdmin.lookupContext(groupDn);
-                ctx.removeAttributeValue("member", userDn);
+                ctx.removeAttributeValue("member", userDn.toString());
                 ldapTemplateAdmin.modifyAttributes(ctx);
             } catch (Exception e) {
-                // Si no era miembro, ignoramos
+                // Si no era miembro o no existe, ignoramos
             }
         }
 
-        String newGroupDn = "CN=" + grupoCN + ",CN=Users,DC=itu,DC=local";
         org.springframework.ldap.core.DirContextOperations ctx =
                 ldapTemplateAdmin.lookupContext(newGroupDn);
-        ctx.addAttributeValue("member", userDn);
+        ctx.addAttributeValue("member", userDn.toString());
         ldapTemplateAdmin.modifyAttributes(ctx);
     }
 }

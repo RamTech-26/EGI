@@ -19,6 +19,9 @@ public class AuthController {
     @Autowired
     private LdapAuthService ldapAuthService;
 
+    @Autowired
+    private LdapAdminService ldapAdminService;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         String username = request.getUsername();
@@ -45,10 +48,9 @@ public class AuthController {
         LoginResponse response = new LoginResponse();
         response.setToken(token);
         response.setUsername(username);
+        response.setRoles(roles);
         return ResponseEntity.ok(response);
     }
-    @Autowired
-    private LdapAdminService ldapAdminService;
 
     @PostMapping("/admin/agregar-grupo")
     public ResponseEntity<?> cambiarGrupoUsuario(@RequestBody AgregarGrupoRequest request) {
@@ -56,6 +58,26 @@ public class AuthController {
             ldapAdminService.cambiarGrupoUsuario(request.getUsername(), request.getGrupo());
             return ResponseEntity.ok("Usuario " + request.getUsername() + " agregado al grupo " + request.getGrupo());
         } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/admin/usuarios")
+    public ResponseEntity<?> listarUsuarios() {
+        try {
+            return ResponseEntity.ok(ldapAuthService.obtenerUsuariosConRol());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/admin/cambiar-rol")
+    public ResponseEntity<?> cambiarRol(@RequestBody AgregarGrupoRequest request) {
+        try {
+            ldapAdminService.cambiarGrupoUsuario(request.getUsername(), request.getGrupo());
+            return ResponseEntity.ok("Rol actualizado correctamente");
+        } catch (Exception e) {
+            e.printStackTrace(); // ← agregá esto
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }

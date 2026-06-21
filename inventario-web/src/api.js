@@ -6,7 +6,6 @@ function getToken() {
 
 function getAuthHeaders() {
   const token = getToken();
-
   return {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${token}`
@@ -16,27 +15,21 @@ function getAuthHeaders() {
 export async function login(username, password) {
   const response = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
   });
-
-  if (!response.ok) {
-    throw new Error("Usuario o contraseña incorrectos");
-  }
-
+  if (!response.ok) throw new Error("Usuario o contraseña incorrectos");
   const data = await response.json();
-
   localStorage.setItem("token", data.token);
   localStorage.setItem("username", data.username);
-
+  localStorage.setItem("roles", JSON.stringify(data.roles || []));
   return data;
 }
 
 export function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("username");
+  localStorage.removeItem("roles");
 }
 
 export function isAuthenticated() {
@@ -48,24 +41,7 @@ export async function obtenerEquipos() {
     method: "GET",
     headers: getAuthHeaders()
   });
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener los equipos");
-  }
-
-  return await response.json();
-}
-
-export async function obtenerEquipoPorId(id) {
-  const response = await fetch(`${API_URL}/api/equipos/${id}`, {
-    method: "GET",
-    headers: getAuthHeaders()
-  });
-
-  if (!response.ok) {
-    throw new Error("No se pudo obtener el equipo");
-  }
-
+  if (!response.ok) throw new Error("No se pudieron obtener los equipos");
   return await response.json();
 }
 
@@ -74,11 +50,7 @@ export async function obtenerInventarioCompleto(idEquipo) {
     method: "GET",
     headers: getAuthHeaders()
   });
-
-  if (!response.ok) {
-    throw new Error("No se pudo obtener el inventario completo");
-  }
-
+  if (!response.ok) throw new Error("No se pudo obtener el inventario completo");
   return await response.json();
 }
 
@@ -88,25 +60,7 @@ export async function crearEquipo(equipo) {
     headers: getAuthHeaders(),
     body: JSON.stringify(equipo)
   });
-
-  if (!response.ok) {
-    throw new Error("No se pudo crear el equipo");
-  }
-
-  return await response.json();
-}
-
-export async function editarEquipo(id, equipo) {
-  const response = await fetch(`${API_URL}/api/equipos/${id}`, {
-    method: "PUT",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(equipo)
-  });
-
-  if (!response.ok) {
-    throw new Error("No se pudo editar el equipo");
-  }
-
+  if (!response.ok) throw new Error("No se pudo crear el equipo");
   return await response.json();
 }
 
@@ -115,11 +69,7 @@ export async function eliminarEquipo(id) {
     method: "DELETE",
     headers: getAuthHeaders()
   });
-
-  if (!response.ok) {
-    throw new Error("No se pudo eliminar el equipo");
-  }
-
+  if (!response.ok) throw new Error("No se pudo eliminar el equipo");
   return true;
 }
 
@@ -128,11 +78,7 @@ export async function obtenerUbicaciones() {
     method: "GET",
     headers: getAuthHeaders()
   });
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener las ubicaciones");
-  }
-
+  if (!response.ok) throw new Error("No se pudieron obtener las ubicaciones");
   return await response.json();
 }
 
@@ -141,11 +87,7 @@ export async function obtenerResponsables() {
     method: "GET",
     headers: getAuthHeaders()
   });
-
-  if (!response.ok) {
-    throw new Error("No se pudieron obtener los responsables");
-  }
-
+  if (!response.ok) throw new Error("No se pudieron obtener los responsables");
   return await response.json();
 }
 
@@ -176,5 +118,24 @@ export async function crearHardware(hardware) {
     body: JSON.stringify(hardware)
   });
   if (!response.ok) throw new Error("No se pudo crear el hardware");
+  return await response.json();
+}
+
+export async function obtenerUsuariosAD() {
+  const response = await fetch(`${API_URL}/api/auth/admin/usuarios`, {
+    method: "GET",
+    headers: getAuthHeaders()
+  });
+  if (!response.ok) throw new Error("No se pudieron obtener los usuarios");
+  return await response.json();
+}
+
+export async function cambiarRolUsuario(username, grupo) {
+  const response = await fetch(`${API_URL}/api/auth/admin/cambiar-rol`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ username, grupo })
+  });
+  if (!response.ok) throw new Error("No se pudo cambiar el rol");
   return await response.json();
 }

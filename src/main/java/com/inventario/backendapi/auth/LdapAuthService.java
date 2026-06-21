@@ -35,7 +35,7 @@ public class LdapAuthService {
     }
 
     public List<String> obtenerGrupos(String username) {
-        String userDn = "CN=" + username + ",CN=Users,DC=itu,DC=local";
+        String userDn = "CN=" + username + ",OU=Usuarios,OU=EGI,DC=itu,DC=local";
 
         AndFilter filter = new AndFilter();
         filter.and(new EqualsFilter("objectClass", "group"));
@@ -66,5 +66,52 @@ public class LdapAuthService {
             }
         }
         return roles;
+    }
+
+    public List<String> obtenerUsuariosDeGrupo(String grupoCN) {
+        String groupDn = "CN=" + grupoCN + ",OU=Grupos,OU=EGI,DC=itu,DC=local";
+
+        AndFilter filter = new AndFilter();
+        filter.and(new EqualsFilter("objectClass", "group"));
+        filter.and(new EqualsFilter("cn", grupoCN));
+
+        List<String> miembros = ldapTemplate.search(
+                "",
+                filter.encode(),
+                (AttributesMapper<List<String>>) attrs -> {
+                    List<String> users = new ArrayList<>();
+                    try {
+                        javax.naming.NamingEnumeration<?> members = attrs.get("member").getAll();
+                        while (members.hasMore()) {
+                            String dn = members.next().toString();
+                            // Extraer el CN del DN: CN=usr.lector,OU=...
+                            String cn = dn.split(",")[0].replace("CN=", "").replace("cn=", "");
+                            users.add(cn);
+                        }
+                    } catch (Exception e) {
+                        // grupo sin miembros
+                    }
+                    return users;
+                }
+        ).stream().findFirst().orElse(new ArrayList<>());
+
+        return miembros;
+    }
+
+    public List<java.util.Map<String, String>> obtenerUsuariosConRol() {
+        List<String> grupos = List.of("GRP_LECTOR", "GRP_EDITOR", "GRP_ADMINISTRADOR");
+        List<java.util.Map<String, String>> resultado = new ArrayList<>();
+
+        for (String grupo : grupos) {
+            String rol = convertirGruposARoles(List.of(grupo)).stream().findFirst().orElse("");
+            for (String usuario : obtenerUsuariosDeGrupo(grupo)) {
+                java.util.Map<String, String> entry = new java.util.HashMap<>();
+                entry.put("username", usuario);
+                entry.put("rol", rol);
+                entry.put("grupo", grupo);
+                resultado.add(entry);
+            }
+        }
+        return resultado;
     }
 }

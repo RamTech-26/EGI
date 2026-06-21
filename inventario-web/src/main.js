@@ -10,7 +10,9 @@ import {
   obtenerResponsables,
   crearUbicacion,
   crearResponsable,
-  crearHardware
+  crearHardware,
+  obtenerUsuariosAD,
+  cambiarRolUsuario
 } from "./api.js";
 
 const app = document.querySelector("#app");
@@ -59,6 +61,8 @@ function renderLogin() {
 
 function renderDashboard() {
   const username = localStorage.getItem("username") || "usuario";
+  const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+  const esAdmin = roles.includes("ADMINISTRADOR");
 
   app.innerHTML = `
     <main class="layout">
@@ -69,6 +73,7 @@ function renderDashboard() {
         <button id="btn-alta-equipo">Alta de equipo</button>
         <button id="btn-alta-ubicacion">Alta de ubicación</button>
         <button id="btn-alta-responsable">Alta de responsable</button>
+        ${esAdmin ? `<button id="btn-usuarios-ad">Gestión de usuarios</button>` : ""}
         <button id="btn-salir">Cerrar sesión</button>
       </aside>
       <section class="content">
@@ -88,6 +93,9 @@ function renderDashboard() {
   document.querySelector("#btn-alta-equipo").addEventListener("click", renderAltaEquipo);
   document.querySelector("#btn-alta-ubicacion").addEventListener("click", renderAltaUbicacion);
   document.querySelector("#btn-alta-responsable").addEventListener("click", renderAltaResponsable);
+  if (esAdmin) {
+    document.querySelector("#btn-usuarios-ad").addEventListener("click", renderGestionUsuarios);
+  }
   document.querySelector("#btn-salir").addEventListener("click", () => {
     logout();
     renderLogin();
@@ -98,7 +106,6 @@ function renderDashboard() {
 
 async function renderInventario() {
   const section = document.querySelector("#main-section");
-
   section.innerHTML = `
     <section class="panel">
       <div class="panel-header">
@@ -111,9 +118,7 @@ async function renderInventario() {
       <div id="tabla-container"><p>Cargando equipos...</p></div>
     </section>
   `;
-
   document.querySelector("#btn-recargar").addEventListener("click", renderInventario);
-
   try {
     const equipos = await obtenerEquipos();
     renderTablaEquipos(equipos);
@@ -124,12 +129,10 @@ async function renderInventario() {
 
 function renderTablaEquipos(equipos) {
   const container = document.querySelector("#tabla-container");
-
   if (!equipos.length) {
     container.innerHTML = `<p>No hay equipos registrados.</p>`;
     return;
   }
-
   container.innerHTML = `
     <table>
       <thead>
@@ -159,11 +162,9 @@ function renderTablaEquipos(equipos) {
       </tbody>
     </table>
   `;
-
   document.querySelectorAll(".btn-ver").forEach((button) => {
     button.addEventListener("click", () => renderDetalleInventario(button.dataset.id));
   });
-
   document.querySelectorAll(".btn-eliminar").forEach((button) => {
     button.addEventListener("click", () => eliminarEquipoDesdeVista(button.dataset.id));
   });
@@ -171,16 +172,13 @@ function renderTablaEquipos(equipos) {
 
 async function renderDetalleInventario(idEquipo) {
   const section = document.querySelector("#main-section");
-
   section.innerHTML = `
     <section class="panel">
       <button id="volver">← Volver</button>
       <p>Cargando inventario completo...</p>
     </section>
   `;
-
   document.querySelector("#volver").addEventListener("click", renderInventario);
-
   try {
     const inventario = await obtenerInventarioCompleto(idEquipo);
     renderDetalle(inventario);
@@ -198,7 +196,6 @@ async function renderDetalleInventario(idEquipo) {
 function renderDetalle(inventario) {
   const section = document.querySelector("#main-section");
   const { equipo, ubicacion, responsable, componentes } = inventario;
-
   section.innerHTML = `
     <section class="panel">
       <button id="volver">← Volver</button>
@@ -242,13 +239,11 @@ function renderDetalle(inventario) {
       </div>
     </section>
   `;
-
   document.querySelector("#volver").addEventListener("click", renderInventario);
 }
 
 async function renderAltaEquipo() {
   const section = document.querySelector("#main-section");
-
   section.innerHTML = `
     <section class="panel">
       <h2>Alta de equipo</h2>
@@ -262,7 +257,6 @@ async function renderAltaEquipo() {
         <select id="responsableId" required>
           <option value="">Cargando responsables...</option>
         </select>
-
         <h3>Datos de hardware (MongoDB)</h3>
         <input id="hw-fabricante" placeholder="Fabricante (ej: Dell)" required />
         <input id="hw-modelo" placeholder="Modelo (ej: OptiPlex 3000)" required />
@@ -274,7 +268,6 @@ async function renderAltaEquipo() {
         <input id="hw-monitor" placeholder="Monitor (ej: Dell 24&quot;)" />
         <input id="hw-mouse" placeholder="Mouse (ej: Dell)" />
         <input id="hw-teclado" placeholder="Teclado (ej: Dell)" />
-
         <button type="submit">Guardar equipo completo</button>
       </form>
     </section>
@@ -285,15 +278,12 @@ async function renderAltaEquipo() {
       obtenerUbicaciones(),
       obtenerResponsables()
     ]);
-
     document.querySelector("#ubicacionId").innerHTML =
         `<option value="">Seleccionar ubicación</option>` +
         ubicaciones.map((u) => `<option value="${u.id}">${u.edificio} - ${u.area}</option>`).join("");
-
     document.querySelector("#responsableId").innerHTML =
         `<option value="">Seleccionar responsable</option>` +
         responsables.map((r) => `<option value="${r.id}">${r.nombre} ${r.apellido}</option>`).join("");
-
   } catch (error) {
     document.querySelector("#ubicacionId").innerHTML = `<option value="">Error al cargar</option>`;
     document.querySelector("#responsableId").innerHTML = `<option value="">Error al cargar</option>`;
@@ -301,16 +291,13 @@ async function renderAltaEquipo() {
 
   document.querySelector("#form-alta").addEventListener("submit", async (event) => {
     event.preventDefault();
-
     const codigo = document.querySelector("#codigo").value.trim();
-
     const equipo = {
       codigo,
       fechaAdquisicion: document.querySelector("#fechaAdquisicion").value,
       ubicacion: { id: Number(document.querySelector("#ubicacionId").value) },
       responsable: { id: Number(document.querySelector("#responsableId").value) }
     };
-
     const hardware = {
       id: codigo,
       fabricante: document.querySelector("#hw-fabricante").value.trim(),
@@ -324,7 +311,6 @@ async function renderAltaEquipo() {
       mouse: document.querySelector("#hw-mouse").value.trim(),
       teclado: document.querySelector("#hw-teclado").value.trim()
     };
-
     try {
       await crearEquipo(equipo);
       await crearHardware(hardware);
@@ -338,7 +324,6 @@ async function renderAltaEquipo() {
 
 function renderAltaUbicacion() {
   const section = document.querySelector("#main-section");
-
   section.innerHTML = `
     <section class="panel">
       <h2>Alta de ubicación</h2>
@@ -354,7 +339,6 @@ function renderAltaUbicacion() {
       </form>
     </section>
   `;
-
   document.querySelector("#form-ubicacion").addEventListener("submit", async (event) => {
     event.preventDefault();
     const ubicacion = {
@@ -373,7 +357,6 @@ function renderAltaUbicacion() {
 
 function renderAltaResponsable() {
   const section = document.querySelector("#main-section");
-
   section.innerHTML = `
     <section class="panel">
       <h2>Alta de responsable</h2>
@@ -386,7 +369,6 @@ function renderAltaResponsable() {
       </form>
     </section>
   `;
-
   document.querySelector("#form-responsable").addEventListener("submit", async (event) => {
     event.preventDefault();
     const responsable = {
@@ -403,6 +385,77 @@ function renderAltaResponsable() {
       alert("Error al crear el responsable.");
     }
   });
+}
+
+async function renderGestionUsuarios() {
+  const section = document.querySelector("#main-section");
+  section.innerHTML = `
+    <section class="panel">
+      <h2>Gestión de usuarios AD</h2>
+      <div id="tabla-usuarios"><p>Cargando usuarios...</p></div>
+    </section>
+  `;
+
+  try {
+    const usuarios = await obtenerUsuariosAD();
+    const container = document.querySelector("#tabla-usuarios");
+
+    if (!usuarios.length) {
+      container.innerHTML = `<p>No hay usuarios en los grupos de la aplicación.</p>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Rol actual</th>
+            <th>Cambiar a</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${usuarios.map((u) => `
+            <tr>
+              <td>${u.username}</td>
+              <td>${u.rol}</td>
+              <td>
+                <select class="select-rol" data-username="${u.username}">
+                  <option value="">Seleccionar</option>
+                  <option value="GRP_LECTOR" ${u.grupo === "GRP_LECTOR" ? "selected" : ""}>LECTOR</option>
+                  <option value="GRP_EDITOR" ${u.grupo === "GRP_EDITOR" ? "selected" : ""}>EDITOR</option>
+                  <option value="GRP_ADMINISTRADOR" ${u.grupo === "GRP_ADMINISTRADOR" ? "selected" : ""}>ADMINISTRADOR</option>
+                </select>
+              </td>
+              <td>
+                <button class="btn-cambiar-rol" data-username="${u.username}">Cambiar</button>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    document.querySelectorAll(".btn-cambiar-rol").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const username = btn.dataset.username;
+        const select = document.querySelector(`.select-rol[data-username="${username}"]`);
+        const grupo = select.value;
+        if (!grupo) { alert("Seleccioná un rol"); return; }
+        try {
+          await cambiarRolUsuario(username, grupo);
+          alert(`Rol de ${username} actualizado correctamente`);
+          renderGestionUsuarios();
+        } catch (error) {
+          alert("Error al cambiar el rol.");
+        }
+      });
+    });
+
+  } catch (error) {
+    document.querySelector("#tabla-usuarios").innerHTML = `<p>Error al cargar usuarios.</p>`;
+  }
 }
 
 async function eliminarEquipoDesdeVista(id) {

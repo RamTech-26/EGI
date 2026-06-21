@@ -3,6 +3,7 @@ package com.inventario.backendapi.dto;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.List;
 
 @Getter
 @Setter
@@ -10,13 +11,5 @@ import lombok.Setter;
 public class LoginResponse {
     private String token;
     private String username;
-    // TODO: En producción, podría agregarse "roles" o "authorities" cuando se integre con AD.
-    /*
-    *
-    *
-    *           Roles/Authorities --> vienen desde AD
-    *
-    *
-    *
-    * */
+    private List<String> roles;
 }
