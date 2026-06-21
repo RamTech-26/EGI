@@ -36,12 +36,13 @@ public class LdapAuthService {
 
     public List<String> obtenerGrupos(String username) {
         String userDn = "CN=" + username + ",OU=Usuarios,OU=EGI,DC=itu,DC=local";
+        System.out.println("Buscando grupos para DN: " + userDn);
 
         AndFilter filter = new AndFilter();
         filter.and(new EqualsFilter("objectClass", "group"));
         filter.and(new EqualsFilter("member", userDn));
 
-        return ldapTemplate.search(
+        List<String> grupos = ldapTemplate.search(
                 "",
                 filter.encode(),
                 (AttributesMapper<String>) attrs -> {
@@ -52,6 +53,8 @@ public class LdapAuthService {
                     }
                 }
         );
+        System.out.println("Grupos encontrados: " + grupos);
+        return grupos;
     }
 
     public List<String> convertirGruposARoles(List<String> gruposAD) {
