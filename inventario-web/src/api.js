@@ -1,10 +1,31 @@
-﻿const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export const ROLES = {
   LECTOR: "LECTOR",
   EDITOR: "EDITOR",
   ADMINISTRADOR: "ADMINISTRADOR"
 };
+
+const USUARIOS_ENDPOINTS = [
+  "/api/admin/usuarios",
+  "/api/usuarios",
+  "/api/ad/usuarios"
+];
+
+const GRUPOS_ENDPOINTS = [
+  "/api/admin/grupos",
+  "/api/grupos",
+  "/api/ad/grupos"
+];
+
+const CAMBIAR_GRUPO_ENDPOINTS = [
+  { method: "PUT", path: (username) => `/api/admin/usuarios/${encodeURIComponent(username)}/grupo`, body: (username, grupo) => ({ grupo }) },
+  { method: "PUT", path: (username) => `/api/usuarios/${encodeURIComponent(username)}/grupo`, body: (username, grupo) => ({ grupo }) },
+  { method: "PATCH", path: (username) => `/api/admin/usuarios/${encodeURIComponent(username)}/grupo`, body: (username, grupo) => ({ grupo }) },
+  { method: "PATCH", path: (username) => `/api/usuarios/${encodeURIComponent(username)}/grupo`, body: (username, grupo) => ({ grupo }) },
+  { method: "POST", path: () => "/api/admin/usuarios/cambiar-grupo", body: (username, grupo) => ({ username, grupo }) },
+  { method: "POST", path: () => "/api/usuarios/cambiar-grupo", body: (username, grupo) => ({ username, grupo }) }
+];
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -132,6 +153,47 @@ async function handleResponse(response, errorMessage) {
   return await response.json();
 }
 
+async function fetchGetWithFallback(paths, errorMessage) {
+  let lastError = null;
+
+  for (const path of paths) {
+    const response = await fetch(`${API_URL}${path}`, {
+      method: "GET",
+      headers: getAuthHeaders()
+    });
+
+    if (response.status === 404) {
+      lastError = new ApiError(`Endpoint no encontrado: ${path}`, 404);
+      continue;
+    }
+
+    return await handleResponse(response, errorMessage);
+  }
+
+  throw lastError || new ApiError(errorMessage, 404);
+}
+
+async function fetchChangeGroupWithFallback(username, grupo) {
+  let lastError = null;
+
+  for (const endpoint of CAMBIAR_GRUPO_ENDPOINTS) {
+    const response = await fetch(`${API_URL}${endpoint.path(username)}`, {
+      method: endpoint.method,
+      headers: getAuthHeaders(),
+      body: JSON.stringify(endpoint.body(username, grupo))
+    });
+
+    if (response.status === 404 || response.status === 405) {
+      lastError = new ApiError("Endpoint de cambio de grupo no encontrado.", response.status);
+      continue;
+    }
+
+    return await handleResponse(response, "No se pudo cambiar el grupo del usuario");
+  }
+
+  throw lastError || new ApiError("No se pudo cambiar el grupo del usuario", 404);
+}
+
 export async function login(username, password) {
   const response = await fetch(`${API_URL}/api/auth/login`, {
     method: "POST",
@@ -154,33 +216,6 @@ export async function login(username, password) {
   };
 }
 
-export function setMockSession(username) {
-  const normalizedUsername = String(username || "").toLowerCase();
-
-  let role = ROLES.LECTOR;
-
-  if (normalizedUsername === "admin" || normalizedUsername === "administrador") {
-    role = ROLES.ADMINISTRADOR;
-  }
-
-  if (normalizedUsername === "editor" || normalizedUsername === "editor") {
-    role = ROLES.EDITOR;
-  }
-
-  if (normalizedUsername === "ana" || normalizedUsername === "lector") {
-    role = ROLES.LECTOR;
-  }
-
-  localStorage.setItem("token", "mock-token");
-  localStorage.setItem("username", username || "ana");
-  localStorage.setItem("role", role);
-
-  return {
-    username: username || "ana",
-    role
-  };
-}
-
 export function logout() {
   localStorage.removeItem("token");
   localStorage.removeItem("username");
@@ -198,21 +233,23 @@ export function canView() {
   return true;
 }
 
+export function isAdmin() {
+  const { role } = getCurrentUser();
+  return role === ROLES.ADMINISTRADOR;
+}
+
 export function canCreate() {
   const { role } = getCurrentUser();
-
   return role === ROLES.ADMINISTRADOR;
 }
 
 export function canEdit() {
   const { role } = getCurrentUser();
-
   return role === ROLES.ADMINISTRADOR || role === ROLES.EDITOR;
 }
 
 export function canDelete() {
   const { role } = getCurrentUser();
-
   return role === ROLES.ADMINISTRADOR;
 }
 
@@ -272,6 +309,16 @@ export async function obtenerUbicaciones() {
   return await handleResponse(response, "No se pudieron obtener las ubicaciones");
 }
 
+export async function crearUbicacion(ubicacion) {
+  const response = await fetch(`${API_URL}/api/ubicaciones`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(ubicacion)
+  });
+
+  return await handleResponse(response, "No se pudo crear la ubicación");
+}
+
 export async function obtenerResponsables() {
   const response = await fetch(`${API_URL}/api/responsables`, {
     method: "GET",
@@ -279,4 +326,32 @@ export async function obtenerResponsables() {
   });
 
   return await handleResponse(response, "No se pudieron obtener los responsables");
+}
+
+export async function crearResponsable(responsable) {
+  const response = await fetch(`${API_URL}/api/responsables`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(responsable)
+  });
+
+  return await handleResponse(response, "No se pudo crear el responsable");
+}
+
+export async function obtenerUsuarios() {
+  return await fetchGetWithFallback(
+    USUARIOS_ENDPOINTS,
+    "No se pudieron obtener los usuarios del Active Directory"
+  );
+}
+
+export async function obtenerGrupos() {
+  return await fetchGetWithFallback(
+    GRUPOS_ENDPOINTS,
+    "No se pudieron obtener los grupos disponibles"
+  );
+}
+
+export async function cambiarGrupoUsuario(username, grupo) {
+  return await fetchChangeGroupWithFallback(username, grupo);
 }

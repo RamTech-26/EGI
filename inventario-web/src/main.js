@@ -1,10 +1,11 @@
-﻿import "./style.css";
+import "./style.css";
 
 import {
   ApiError,
   login,
   logout,
   getCurrentUser,
+  isAdmin,
   canCreate,
   canEdit,
   canDelete,
@@ -14,7 +15,12 @@ import {
   editarEquipo,
   eliminarEquipo,
   obtenerUbicaciones,
-  obtenerResponsables
+  crearUbicacion,
+  obtenerResponsables,
+  crearResponsable,
+  obtenerUsuarios,
+  obtenerGrupos,
+  cambiarGrupoUsuario
 } from "./api.js";
 
 const app = document.querySelector("#app");
@@ -38,6 +44,64 @@ function mostrarErrorSesion(error) {
   }
 
   return false;
+}
+
+function normalizarLista(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.content)) return data.content;
+  if (Array.isArray(data?.usuarios)) return data.usuarios;
+  if (Array.isArray(data?.users)) return data.users;
+  if (Array.isArray(data?.grupos)) return data.grupos;
+  if (Array.isArray(data?.groups)) return data.groups;
+  if (Array.isArray(data?.data)) return data.data;
+
+  return [];
+}
+
+function obtenerNombreUsuario(usuario) {
+  if (typeof usuario === "string") return usuario;
+
+  return (
+    usuario.username ||
+    usuario.usuario ||
+    usuario.userName ||
+    usuario.sAMAccountName ||
+    usuario.cn ||
+    usuario.uid ||
+    usuario.nombreUsuario ||
+    usuario.nombre ||
+    ""
+  );
+}
+
+function obtenerTextoUsuario(usuario) {
+  if (typeof usuario === "string") return usuario;
+
+  const username = obtenerNombreUsuario(usuario);
+  const nombreCompleto = [usuario.nombre, usuario.apellido].filter(Boolean).join(" ");
+  const displayName = usuario.displayName || usuario.name || nombreCompleto;
+
+  if (displayName && username && displayName !== username) {
+    return `${displayName} (${username})`;
+  }
+
+  return username || "Usuario sin nombre";
+}
+
+function obtenerNombreGrupo(grupo) {
+  if (typeof grupo === "string") return grupo;
+
+  return (
+    grupo.nombre ||
+    grupo.name ||
+    grupo.grupo ||
+    grupo.group ||
+    grupo.cn ||
+    grupo.authority ||
+    grupo.rol ||
+    grupo.role ||
+    ""
+  );
 }
 
 function renderLogin() {
@@ -108,6 +172,9 @@ function renderDashboard() {
 
         <button id="btn-inventario">Equipos informáticos</button>
         ${canCreate() ? `<button id="btn-alta">Registrar equipo</button>` : ""}
+        ${canCreate() ? `<button id="btn-alta-ubicacion">Cargar ubicación</button>` : ""}
+        ${canCreate() ? `<button id="btn-alta-responsable">Cargar responsable</button>` : ""}
+        ${isAdmin() ? `<button id="btn-admin-usuarios">Administrar usuarios</button>` : ""}
         <button id="btn-salir">Cerrar sesión</button>
       </aside>
 
@@ -133,6 +200,21 @@ function renderDashboard() {
   const btnAlta = document.querySelector("#btn-alta");
   if (btnAlta) {
     btnAlta.addEventListener("click", renderAltaEquipo);
+  }
+
+  const btnAltaUbicacion = document.querySelector("#btn-alta-ubicacion");
+  if (btnAltaUbicacion) {
+    btnAltaUbicacion.addEventListener("click", renderAltaUbicacion);
+  }
+
+  const btnAltaResponsable = document.querySelector("#btn-alta-responsable");
+  if (btnAltaResponsable) {
+    btnAltaResponsable.addEventListener("click", renderAltaResponsable);
+  }
+
+  const btnAdminUsuarios = document.querySelector("#btn-admin-usuarios");
+  if (btnAdminUsuarios) {
+    btnAdminUsuarios.addEventListener("click", renderAdministrarUsuarios);
   }
 
   document.querySelector("#btn-salir").addEventListener("click", () => {
@@ -200,6 +282,8 @@ function renderResumenPermisos() {
 
   if (canCreate()) {
     permisos.push("Crear equipo");
+    permisos.push("Crear ubicación");
+    permisos.push("Crear responsable");
   }
 
   if (canEdit()) {
@@ -208,6 +292,10 @@ function renderResumenPermisos() {
 
   if (canDelete()) {
     permisos.push("Eliminar equipo");
+  }
+
+  if (isAdmin()) {
+    permisos.push("Administrar usuarios");
   }
 
   return `
@@ -278,6 +366,8 @@ async function renderDetalleInventario(idEquipo) {
     </section>
   `;
 
+  document.querySelector("#volver").addEventListener("click", renderInventario);
+
   try {
     const inventario = await obtenerInventarioCompleto(idEquipo);
     renderDetalle(inventario);
@@ -340,7 +430,7 @@ function renderDetalle(inventario) {
             <p>
               <strong>${componente.tipo}:</strong>
               ${componente.marca} ${componente.modelo}
-              <span class="estado activo">${componente.estado}</span>
+              <span class="estado activo">${componente.estado || "ACTIVO"}</span>
             </p>
           `).join("")}
         </article>
@@ -458,6 +548,238 @@ async function renderAltaEquipo() {
 
       alert("No se pudo registrar el equipo. Verificá el backend.");
       console.error("Error al crear equipo:", error);
+    }
+  });
+}
+
+async function renderAltaUbicacion() {
+  if (!canCreate()) {
+    alert("No tenés permisos para crear ubicaciones.");
+    renderInventario();
+    return;
+  }
+
+  const section = document.querySelector("#main-section");
+
+  section.innerHTML = `
+    <section class="panel">
+      <h2>Cargar ubicación</h2>
+      <p>Registrá una ubicación para que luego pueda seleccionarse al crear equipos.</p>
+
+      <form id="form-ubicacion" class="form-grid">
+        <input id="edificio" placeholder="Edificio: Central, Anexo, Laboratorio 1" required />
+
+        <select id="area" required>
+          <option value="">Seleccionar área</option>
+          <option value="AULA">AULA</option>
+          <option value="LABORATORIO">LABORATORIO</option>
+          <option value="SECRETARIA">SECRETARIA</option>
+        </select>
+
+        <button type="submit">Guardar ubicación</button>
+      </form>
+    </section>
+  `;
+
+  document.querySelector("#form-ubicacion").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const ubicacion = {
+      edificio: document.querySelector("#edificio").value.trim(),
+      area: document.querySelector("#area").value
+    };
+
+    try {
+      await crearUbicacion(ubicacion);
+      alert("Ubicación registrada correctamente");
+      renderInventario();
+    } catch (error) {
+      if (mostrarErrorSesion(error)) return;
+
+      if (error instanceof ApiError && error.status === 403) {
+        alert("No tenés permisos para crear ubicaciones.");
+        return;
+      }
+
+      alert("No se pudo registrar la ubicación. Verificá el backend.");
+      console.error("Error al crear ubicación:", error);
+    }
+  });
+}
+
+async function renderAltaResponsable() {
+  if (!canCreate()) {
+    alert("No tenés permisos para crear responsables.");
+    renderInventario();
+    return;
+  }
+
+  const section = document.querySelector("#main-section");
+
+  section.innerHTML = `
+    <section class="panel">
+      <h2>Cargar responsable</h2>
+      <p>Registrá responsables para poder asignarlos a los equipos informáticos.</p>
+
+      <form id="form-responsable" class="form-grid">
+        <input id="nombre" placeholder="Nombre" required />
+        <input id="apellido" placeholder="Apellido" required />
+        <input id="email" type="email" placeholder="Email" required />
+        <input id="telefono" placeholder="Teléfono" required />
+
+        <button type="submit">Guardar responsable</button>
+      </form>
+    </section>
+  `;
+
+  document.querySelector("#form-responsable").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const responsable = {
+      nombre: document.querySelector("#nombre").value.trim(),
+      apellido: document.querySelector("#apellido").value.trim(),
+      email: document.querySelector("#email").value.trim(),
+      telefono: document.querySelector("#telefono").value.trim()
+    };
+
+    try {
+      await crearResponsable(responsable);
+      alert("Responsable registrado correctamente");
+      renderInventario();
+    } catch (error) {
+      if (mostrarErrorSesion(error)) return;
+
+      if (error instanceof ApiError && error.status === 403) {
+        alert("No tenés permisos para crear responsables.");
+        return;
+      }
+
+      alert("No se pudo registrar el responsable. Verificá el backend.");
+      console.error("Error al crear responsable:", error);
+    }
+  });
+}
+
+async function renderAdministrarUsuarios() {
+  if (!isAdmin()) {
+    alert("Solo un usuario administrador puede acceder a esta pantalla.");
+    renderInventario();
+    return;
+  }
+
+  const section = document.querySelector("#main-section");
+
+  section.innerHTML = `
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Administrar usuarios</h2>
+          <p>Cambio de grupo/rol de usuarios del Active Directory. Acceso exclusivo para ADMINISTRADOR.</p>
+        </div>
+
+        <button id="btn-recargar-usuarios" class="primary-button">Actualizar usuarios</button>
+      </div>
+
+      <div id="admin-usuarios-container">
+        <p>Cargando usuarios y grupos...</p>
+      </div>
+    </section>
+  `;
+
+  document.querySelector("#btn-recargar-usuarios").addEventListener("click", renderAdministrarUsuarios);
+
+  try {
+    const usuarios = normalizarLista(await obtenerUsuarios());
+    const grupos = normalizarLista(await obtenerGrupos());
+
+    renderFormularioCambioGrupo(usuarios, grupos);
+  } catch (error) {
+    if (mostrarErrorSesion(error)) return;
+
+    const mensaje = error instanceof ApiError && error.status === 403
+      ? "No tenés permisos para administrar usuarios."
+      : "No se pudieron cargar usuarios o grupos. Verificá con backend los endpoints exactos de administración.";
+
+    document.querySelector("#admin-usuarios-container").innerHTML = `
+      <p class="error-message">${mensaje}</p>
+
+      <div class="info-box">
+        <strong>Endpoints que el frontend intenta usar:</strong>
+        <ul>
+          <li>GET /api/admin/usuarios o GET /api/usuarios</li>
+          <li>GET /api/admin/grupos o GET /api/grupos</li>
+          <li>PUT/PATCH /api/admin/usuarios/{username}/grupo</li>
+          <li>POST /api/admin/usuarios/cambiar-grupo</li>
+        </ul>
+      </div>
+    `;
+
+    console.error("Error al cargar administración de usuarios:", error);
+  }
+}
+
+function renderFormularioCambioGrupo(usuarios, grupos) {
+  const container = document.querySelector("#admin-usuarios-container");
+
+  if (!usuarios.length || !grupos.length) {
+    container.innerHTML = `
+      <p class="error-message">
+        No hay usuarios o grupos disponibles para mostrar. Verificá que el backend devuelva listas válidas.
+      </p>
+    `;
+    return;
+  }
+
+  container.innerHTML = `
+    <form id="form-cambiar-grupo" class="form-grid">
+      <select id="usuario-admin" required>
+        <option value="">Seleccionar usuario</option>
+        ${usuarios.map((usuario) => {
+          const username = obtenerNombreUsuario(usuario);
+          const texto = obtenerTextoUsuario(usuario);
+
+          return `<option value="${username}">${texto}</option>`;
+        }).join("")}
+      </select>
+
+      <select id="grupo-admin" required>
+        <option value="">Seleccionar grupo</option>
+        ${grupos.map((grupo) => {
+          const nombreGrupo = obtenerNombreGrupo(grupo);
+
+          return `<option value="${nombreGrupo}">${nombreGrupo}</option>`;
+        }).join("")}
+      </select>
+
+      <button type="submit">Cambiar grupo del usuario</button>
+    </form>
+
+    <div class="info-box">
+      <strong>Importante:</strong>
+      esta pantalla solo se muestra para ADMINISTRADOR. La validación real también debe estar protegida en el backend.
+    </div>
+  `;
+
+  document.querySelector("#form-cambiar-grupo").addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const username = document.querySelector("#usuario-admin").value;
+    const grupo = document.querySelector("#grupo-admin").value;
+
+    try {
+      await cambiarGrupoUsuario(username, grupo);
+      alert("Grupo del usuario actualizado correctamente.");
+      renderAdministrarUsuarios();
+    } catch (error) {
+      if (mostrarErrorSesion(error)) return;
+
+      if (error instanceof ApiError && error.status === 403) {
+        alert("No tenés permisos para cambiar grupos.");
+        return;
+      }
+
+      alert("No se pudo cambiar el grupo. Confirmá con backend el endpoint y el body esperado.");
+      console.error("Error al cambiar grupo:", error);
     }
   });
 }

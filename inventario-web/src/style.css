@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --bg-main: #f4f7fb;
   --bg-dark: #0f172a;
   --primary: #2563eb;
@@ -818,3 +818,54 @@ td button:hover,
   border: 1px solid var(--color-border) !important;
 }
 
+
+
+/* ================================
+   MÓDULOS NUEVOS: UBICACIONES,
+   RESPONSABLES Y ADMIN USUARIOS
+================================ */
+
+.info-box {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #f8fcfb;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+.info-box strong {
+  color: var(--color-primary-dark);
+}
+
+.info-box ul {
+  margin: 10px 0 0;
+  padding-left: 22px;
+}
+
+.info-box li {
+  margin-bottom: 6px;
+  color: var(--color-muted);
+}
+
+#admin-usuarios-container {
+  margin-top: 18px;
+}
+
+#form-cambiar-grupo select,
+#form-ubicacion select,
+#form-responsable input,
+#form-alta select,
+#form-editar select {
+  min-height: 46px;
+}
+
+.sidebar button#btn-admin-usuarios {
+  border-color: rgba(227, 6, 19, 0.55) !important;
+}
+
+.sidebar button#btn-admin-usuarios:hover {
+  background: var(--color-red) !important;
+  border-color: var(--color-red) !important;
+}
