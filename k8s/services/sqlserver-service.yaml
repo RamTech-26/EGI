@@ -17,6 +17,6 @@ metadata:
   namespace: inventario
 subsets:
   - addresses:
-      - ip: 192.168.100.239
+      - ip: 10.10.10.20
     ports:
       - port: 1433
