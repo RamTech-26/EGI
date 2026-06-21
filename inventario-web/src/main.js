@@ -25,6 +25,92 @@ import {
 
 const app = document.querySelector("#app");
 
+function showNotif(message, type = "info") {
+  const notification = document.createElement("div");
+  notification.className = `notif ${type}`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+
+  setTimeout(() => {
+    notification.classList.add("hide");
+    setTimeout(() => notification.remove(), 300);
+  }, 3200);
+}
+
+function setButtonLoading(button, isLoading, loadingText = "Procesando...") {
+  if (!button) return;
+
+  if (isLoading) {
+    button.dataset.originalText = button.textContent;
+    button.textContent = loadingText;
+    button.disabled = true;
+    return;
+  }
+
+  button.textContent = button.dataset.originalText || button.textContent;
+  button.disabled = false;
+}
+
+function getErrorMessage(error, fallback = "Ocurrió un error inesperado.") {
+  if (error instanceof ApiError) return error.message;
+  if (error?.message?.includes("Failed to fetch")) {
+    return "No se pudo conectar con el backend. Verificá que la API esté corriendo en http://localhost:8080.";
+  }
+
+  return fallback;
+}
+
+function renderInlineError(containerSelector, message, details = "") {
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="error-card">
+      <strong>${message}</strong>
+      ${details ? `<p>${details}</p>` : ""}
+    </div>
+  `;
+}
+
+function validateRequired(fields) {
+  for (const field of fields) {
+    const input = document.querySelector(field.selector);
+    const value = input?.value?.trim();
+
+    input?.classList.remove("input-error", "input-valid");
+
+    if (!value) {
+      input?.classList.add("input-error");
+      showNotif(field.message, "error");
+      input?.focus();
+      return false;
+    }
+
+    input?.classList.add("input-valid");
+  }
+
+  return true;
+}
+
+function validateEmail(selector) {
+  const input = document.querySelector(selector);
+  const value = input?.value?.trim() || "";
+  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+
+  input?.classList.remove("input-error", "input-valid");
+
+  if (!isValid) {
+    input?.classList.add("input-error");
+    showNotif("El email no tiene un formato válido.", "error");
+    input?.focus();
+    return false;
+  }
+
+  input?.classList.add("input-valid");
+  return true;
+}
+
+
 function getRoleLabel(role) {
   const labels = {
     LECTOR: "Lector",
@@ -37,7 +123,7 @@ function getRoleLabel(role) {
 
 function mostrarErrorSesion(error) {
   if (error instanceof ApiError && error.status === 401) {
-    alert("La sesión venció o el token no es válido. Volvé a iniciar sesión.");
+    showNotif("Tu sesión expiró. Iniciá sesión nuevamente.", "error");
     logout();
     renderLogin();
     return true;
@@ -144,19 +230,30 @@ function renderLogin() {
     const password = document.querySelector("#password").value.trim();
     const message = document.querySelector("#login-message");
 
+    if (!validateRequired([
+      { selector: "#username", message: "Ingresá tu usuario de Active Directory." },
+      { selector: "#password", message: "Ingresá tu contraseña." }
+    ])) {
+      message.className = "message error-message";
+      message.textContent = "Completá usuario y contraseña para continuar.";
+      return;
+    }
+
+    const submitButton = document.querySelector("#login-form button");
+    setButtonLoading(submitButton, true, "Accediendo...");
+
     try {
-      await login(username, password);
+      const data = await login(username, password);
+      showNotif(`Bienvenido, ${data.username || username}`, "success");
       renderDashboard();
     } catch (error) {
+      const errorMessage = getErrorMessage(error, "Usuario o contraseña incorrectos.");
       message.className = "message error-message";
-
-      if (error instanceof ApiError) {
-        message.textContent = error.message;
-        return;
-      }
-
-      message.textContent = "No se pudo conectar con el backend. Verificá que la API esté corriendo.";
-      console.error("Error de conexión con backend:", error);
+      message.textContent = errorMessage;
+      showNotif(errorMessage, "error");
+      console.error("Error de login:", error);
+    } finally {
+      setButtonLoading(submitButton, false);
     }
   });
 }
@@ -481,7 +578,7 @@ function llenarSelects(selectUbicacion, selectResponsable, ubicaciones, responsa
 
 async function renderAltaEquipo() {
   if (!canCreate()) {
-    alert("No tenés permisos para crear equipos.");
+    showNotif("No tenés permisos para crear equipos.", "error");
     renderInventario();
     return;
   }
@@ -523,6 +620,16 @@ async function renderAltaEquipo() {
   document.querySelector("#form-alta").addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    if (!validateRequired([
+      { selector: "#codigo", message: "Ingresá el código del equipo." },
+      { selector: "#fechaAdquisicion", message: "Seleccioná la fecha de adquisición." },
+      { selector: "#ubicacionId", message: "Seleccioná una ubicación." },
+      { selector: "#responsableId", message: "Seleccioná un responsable." }
+    ])) return;
+
+    const submitButton = document.querySelector("#form-alta button");
+    setButtonLoading(submitButton, true, "Guardando equipo...");
+
     const equipo = {
       codigo: document.querySelector("#codigo").value.trim(),
       fechaAdquisicion: document.querySelector("#fechaAdquisicion").value,
@@ -536,25 +643,27 @@ async function renderAltaEquipo() {
 
     try {
       await crearEquipo(equipo);
-      alert("Equipo registrado correctamente");
+      showNotif("Equipo registrado correctamente", "success");
       renderInventario();
     } catch (error) {
       if (mostrarErrorSesion(error)) return;
 
       if (error instanceof ApiError && error.status === 403) {
-        alert("No tenés permisos para crear equipos.");
+        showNotif("No tenés permisos para crear equipos.", "error");
         return;
       }
 
-      alert("No se pudo registrar el equipo. Verificá el backend.");
+      showNotif(getErrorMessage(error, "No se pudo registrar el equipo. Verificá el backend."), "error");
       console.error("Error al crear equipo:", error);
+    } finally {
+      setButtonLoading(submitButton, false);
     }
   });
 }
 
 async function renderAltaUbicacion() {
   if (!canCreate()) {
-    alert("No tenés permisos para crear ubicaciones.");
+    showNotif("No tenés permisos para crear ubicaciones.", "error");
     renderInventario();
     return;
   }
@@ -584,6 +693,14 @@ async function renderAltaUbicacion() {
   document.querySelector("#form-ubicacion").addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    if (!validateRequired([
+      { selector: "#edificio", message: "Ingresá el edificio de la ubicación." },
+      { selector: "#area", message: "Seleccioná el área." }
+    ])) return;
+
+    const submitButton = document.querySelector("#form-ubicacion button");
+    setButtonLoading(submitButton, true, "Guardando ubicación...");
+
     const ubicacion = {
       edificio: document.querySelector("#edificio").value.trim(),
       area: document.querySelector("#area").value
@@ -591,25 +708,27 @@ async function renderAltaUbicacion() {
 
     try {
       await crearUbicacion(ubicacion);
-      alert("Ubicación registrada correctamente");
+      showNotif("Ubicación registrada correctamente", "success");
       renderInventario();
     } catch (error) {
       if (mostrarErrorSesion(error)) return;
 
       if (error instanceof ApiError && error.status === 403) {
-        alert("No tenés permisos para crear ubicaciones.");
+        showNotif("No tenés permisos para crear ubicaciones.", "error");
         return;
       }
 
-      alert("No se pudo registrar la ubicación. Verificá el backend.");
+      showNotif(getErrorMessage(error, "No se pudo registrar la ubicación. Verificá el backend."), "error");
       console.error("Error al crear ubicación:", error);
+    } finally {
+      setButtonLoading(submitButton, false);
     }
   });
 }
 
 async function renderAltaResponsable() {
   if (!canCreate()) {
-    alert("No tenés permisos para crear responsables.");
+    showNotif("No tenés permisos para crear responsables.", "error");
     renderInventario();
     return;
   }
@@ -635,6 +754,18 @@ async function renderAltaResponsable() {
   document.querySelector("#form-responsable").addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    if (!validateRequired([
+      { selector: "#nombre", message: "Ingresá el nombre del responsable." },
+      { selector: "#apellido", message: "Ingresá el apellido del responsable." },
+      { selector: "#email", message: "Ingresá el email del responsable." },
+      { selector: "#telefono", message: "Ingresá el teléfono del responsable." }
+    ])) return;
+
+    if (!validateEmail("#email")) return;
+
+    const submitButton = document.querySelector("#form-responsable button");
+    setButtonLoading(submitButton, true, "Guardando responsable...");
+
     const responsable = {
       nombre: document.querySelector("#nombre").value.trim(),
       apellido: document.querySelector("#apellido").value.trim(),
@@ -644,25 +775,27 @@ async function renderAltaResponsable() {
 
     try {
       await crearResponsable(responsable);
-      alert("Responsable registrado correctamente");
+      showNotif("Responsable registrado correctamente", "success");
       renderInventario();
     } catch (error) {
       if (mostrarErrorSesion(error)) return;
 
       if (error instanceof ApiError && error.status === 403) {
-        alert("No tenés permisos para crear responsables.");
+        showNotif("No tenés permisos para crear responsables.", "error");
         return;
       }
 
-      alert("No se pudo registrar el responsable. Verificá el backend.");
+      showNotif(getErrorMessage(error, "No se pudo registrar el responsable. Verificá el backend."), "error");
       console.error("Error al crear responsable:", error);
+    } finally {
+      setButtonLoading(submitButton, false);
     }
   });
 }
 
 async function renderAdministrarUsuarios() {
   if (!isAdmin()) {
-    alert("Solo un usuario administrador puede acceder a esta pantalla.");
+    showNotif("Solo un usuario administrador puede acceder a esta pantalla.", "error");
     renderInventario();
     return;
   }
@@ -766,27 +899,37 @@ function renderFormularioCambioGrupo(usuarios, grupos) {
     const username = document.querySelector("#usuario-admin").value;
     const grupo = document.querySelector("#grupo-admin").value;
 
+    if (!validateRequired([
+      { selector: "#usuario-admin", message: "Seleccioná un usuario." },
+      { selector: "#grupo-admin", message: "Seleccioná un grupo." }
+    ])) return;
+
+    const submitButton = document.querySelector("#form-cambiar-grupo button");
+    setButtonLoading(submitButton, true, "Actualizando grupo...");
+
     try {
       await cambiarGrupoUsuario(username, grupo);
-      alert("Grupo del usuario actualizado correctamente.");
+      showNotif("Grupo del usuario actualizado correctamente", "success");
       renderAdministrarUsuarios();
     } catch (error) {
       if (mostrarErrorSesion(error)) return;
 
       if (error instanceof ApiError && error.status === 403) {
-        alert("No tenés permisos para cambiar grupos.");
+        showNotif("No tenés permisos para cambiar grupos.", "error");
         return;
       }
 
-      alert("No se pudo cambiar el grupo. Confirmá con backend el endpoint y el body esperado.");
+      showNotif(getErrorMessage(error, "No se pudo cambiar el grupo. Confirmá con backend el endpoint y el body esperado."), "error");
       console.error("Error al cambiar grupo:", error);
+    } finally {
+      setButtonLoading(submitButton, false);
     }
   });
 }
 
 async function renderEditarEquipo(idEquipo) {
   if (!canEdit()) {
-    alert("No tenés permisos para editar equipos.");
+    showNotif("No tenés permisos para editar equipos.", "error");
     renderInventario();
     return;
   }
@@ -798,7 +941,7 @@ async function renderEditarEquipo(idEquipo) {
   } catch (error) {
     if (mostrarErrorSesion(error)) return;
 
-    alert("No se pudo cargar el equipo para editar.");
+    showNotif("No se pudo cargar el equipo para editar.", "error");
     console.error("Error al cargar equipo para editar:", error);
     renderInventario();
     return;
@@ -850,6 +993,16 @@ async function renderEditarEquipo(idEquipo) {
   document.querySelector("#form-editar").addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    if (!validateRequired([
+      { selector: "#codigo", message: "Ingresá el código del equipo." },
+      { selector: "#fechaAdquisicion", message: "Seleccioná la fecha de adquisición." },
+      { selector: "#ubicacionId", message: "Seleccioná una ubicación." },
+      { selector: "#responsableId", message: "Seleccioná un responsable." }
+    ])) return;
+
+    const submitButton = document.querySelector("#form-editar button");
+    setButtonLoading(submitButton, true, "Guardando cambios...");
+
     const equipoEditado = {
       codigo: document.querySelector("#codigo").value.trim(),
       fechaAdquisicion: document.querySelector("#fechaAdquisicion").value,
@@ -863,25 +1016,27 @@ async function renderEditarEquipo(idEquipo) {
 
     try {
       await editarEquipo(idEquipo, equipoEditado);
-      alert("Equipo editado correctamente");
+      showNotif("Equipo editado correctamente", "success");
       renderInventario();
     } catch (error) {
       if (mostrarErrorSesion(error)) return;
 
       if (error instanceof ApiError && error.status === 403) {
-        alert("No tenés permisos para editar equipos.");
+        showNotif("No tenés permisos para editar equipos.", "error");
         return;
       }
 
-      alert("No se pudo editar el equipo. Verificá el backend.");
+      showNotif(getErrorMessage(error, "No se pudo editar el equipo. Verificá el backend."), "error");
       console.error("Error al editar equipo:", error);
+    } finally {
+      setButtonLoading(submitButton, false);
     }
   });
 }
 
 async function eliminarEquipoDesdeVista(id) {
   if (!canDelete()) {
-    alert("No tenés permisos para eliminar equipos.");
+    showNotif("No tenés permisos para eliminar equipos.", "error");
     return;
   }
 
@@ -891,17 +1046,17 @@ async function eliminarEquipoDesdeVista(id) {
 
   try {
     await eliminarEquipo(id);
-    alert("Equipo eliminado correctamente");
+    showNotif("Equipo eliminado correctamente", "success");
     renderInventario();
   } catch (error) {
     if (mostrarErrorSesion(error)) return;
 
     if (error instanceof ApiError && error.status === 403) {
-      alert("No tenés permisos para eliminar equipos.");
+      showNotif("No tenés permisos para eliminar equipos.", "error");
       return;
     }
 
-    alert("No se pudo eliminar el equipo. Verificá el backend.");
+    showNotif(getErrorMessage(error, "No se pudo eliminar el equipo. Verificá el backend."), "error");
     console.error("Error al eliminar equipo:", error);
   }
 }

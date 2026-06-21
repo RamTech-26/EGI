@@ -126,31 +126,76 @@ function getToken() {
 
 function getAuthHeaders() {
   const token = getToken();
-
-  return {
-    "Content-Type": "application/json",
-    "Authorization": `Bearer ${token}`
+  const headers = {
+    "Content-Type": "application/json"
   };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  return headers;
+}
+
+async function readResponseBody(response) {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  try {
+    if (contentType.includes("application/json")) {
+      return await response.json();
+    }
+
+    const text = await response.text();
+    return text ? { message: text } : null;
+  } catch (error) {
+    console.warn("No se pudo leer la respuesta del backend.", error);
+    return null;
+  }
+}
+
+function extractServerMessage(data, fallback) {
+  if (!data) return fallback;
+
+  return (
+    data.message ||
+    data.mensaje ||
+    data.error ||
+    data.detail ||
+    data.descripcion ||
+    fallback
+  );
 }
 
 async function handleResponse(response, errorMessage) {
+  const data = await readResponseBody(response);
+
   if (response.status === 401) {
-    throw new ApiError("Sesión inválida o token vencido.", 401);
+    throw new ApiError(
+      extractServerMessage(data, "Sesión inválida o token vencido."),
+      401
+    );
   }
 
   if (response.status === 403) {
-    throw new ApiError("No tenés permisos para realizar esta acción.", 403);
+    throw new ApiError(
+      extractServerMessage(data, "No tenés permisos para realizar esta acción."),
+      403
+    );
   }
 
   if (!response.ok) {
-    throw new ApiError(errorMessage, response.status);
+    throw new ApiError(extractServerMessage(data, errorMessage), response.status);
   }
 
   if (response.status === 204) {
     return true;
   }
 
-  return await response.json();
+  return data;
 }
 
 async function fetchGetWithFallback(paths, errorMessage) {
