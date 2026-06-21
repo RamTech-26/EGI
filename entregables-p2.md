@@ -1,6 +1,8 @@
 # Entregables P2 — Franco
 **Proyecto Integrador EGI — Ecosistema de Inventario Seguro**
 
+> **Nota de versión:** Se descartó la autenticación SQL vía Kerberos por errores persistentes de `PortUnreachableException` en UDP/88. El proyecto usa **SQL Authentication** (login `app_inventario`) y **LDAP simple bind** (puerto 389).
+
 ---
 
 ## VMs y Red
@@ -23,8 +25,11 @@
 | Dominio    | `itu.local`                |
 | Base DN    | `DC=itu,DC=local`          |
 | Puerto     | **389** (NO usar 636)      |
-| Bind user  | `svc-mongo@itu.local`      |
+| Bind user (lectura)  | `svc_backend@itu.local` |
+| Bind user (escritura)| `svc_admin@itu.local`   |
 | Contraseña | `Itu12345!`                |
+
+> ⚠️ **Pendiente de verificar:** confirmar que `svc_backend` y `svc_admin` existen en AD y que `svc_admin` tiene permiso delegado para modificar el atributo `member` de los grupos `GRP_*`.
 
 ---
 
@@ -40,15 +45,13 @@
 | Contraseña     | `Itu12345!`                                                                                |
 | Cadena conexión| `jdbc:sqlserver://10.10.10.20:1433;databaseName=InventarioITU;encrypt=false;trustServerCertificate=true` |
 
----
+Los grupos AD ya están mapeados como logins de SQL Server con sus roles correspondientes:
 
-## Kerberos
-
-| Campo    | Valor                                              |
-|----------|----------------------------------------------------|
-| SPN      | `MSSQLSvc/SERVIDOR-IIS-SQL.itu.local:1433@ITU.LOCAL` |
-| Cuenta   | `svc_inventario@itu.local` / `Itu12345!`           |
-| Keytab   | `sqlserver.keytab` — entregar por canal privado    |
+| Login SQL              | Rol asignado     |
+|-------------------------|------------------|
+| `ITU\GRP_LECTOR`        | `db_datareader`  |
+| `ITU\GRP_EDITOR`        | `db_datawriter`  |
+| `ITU\GRP_ADMINISTRADOR` | `db_owner`       |
 
 ---
 
@@ -75,6 +78,14 @@ Usar la cadena de conexión:
 jdbc:sqlserver://10.10.10.20:1433;databaseName=InventarioITU;encrypt=false;trustServerCertificate=true
 username: app_inventario
 password: Itu12345!
+```
+
+Para LDAP:
+```
+spring.ldap.username: svc_backend@itu.local
+spring.ldap.password: Itu12345!
+spring.ldap-admin.username: svc_admin@itu.local
+spring.ldap-admin.password: Itu12345!
 ```
 
 Las tablas (`ubicaciones`, `responsables`, `equipos`) son creadas automáticamente por Hibernate con `ddl-auto: update`.

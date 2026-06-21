@@ -3,6 +3,8 @@
 Responsable: Franco (P2)  
 Rama: `feature/vms-sql-ad`
 
+> **Nota de versión:** Se descartó la autenticación SQL vía Kerberos por errores persistentes de `PortUnreachableException` en UDP/88 (la rama `feature/backend-api-kerberos` fue abandonada). El proyecto usa **SQL Authentication** (login `app_inventario`) para SQL Server y **LDAP simple bind** (puerto 389) para autenticación de usuarios y operaciones de administración.
+
 ---
 
 ## 📋 Resumen
@@ -63,6 +65,18 @@ Rol:        db_owner en InventarioITU
 jdbc:sqlserver://10.10.10.20:1433;databaseName=InventarioITU;encrypt=false;trustServerCertificate=true
 ```
 
+### Logins de grupos AD en SQL Server
+
+Los grupos de Active Directory están mapeados como logins de Windows en SQL Server, con roles asignados según el principio de menor privilegio:
+
+| Login SQL                | Rol asignado     |
+|----------------------------|------------------|
+| `ITU\GRP_LECTOR`          | `db_datareader`  |
+| `ITU\GRP_EDITOR`          | `db_datawriter`  |
+| `ITU\GRP_ADMINISTRADOR`   | `db_owner`       |
+
+Esto permite, además del control de acceso vía backend, demostrar en SSMS las restricciones reales de cada usuario de AD a nivel de motor de base de datos.
+
 ### Esquema de tablas
 Las tablas son **creadas automáticamente por Hibernate** (`ddl-auto: update`) al iniciar el backend. No crear manualmente.
 
@@ -112,24 +126,23 @@ Estos usuarios simulan un profesor (lector), técnico (editor) y administrador r
 ### Cuentas de servicio
 | Usuario | Propósito | Contraseña |
 |---|---|---|
-| `svc_inventario` | SQL Server Kerberos | `Itu12345!` |
-| `svc-mongo` | MongoDB LDAP auth | `Itu12345!` |
+| `svc_backend` | Bind LDAP de lectura — login y consulta de grupos | `Itu12345!` |
+| `svc_admin` | Bind LDAP de escritura — cambio de grupo de usuarios | `Itu12345!` |
+| `svc-mongo` | MongoDB — LDAP auth | `Itu12345!` |
 
-Bind user para queries LDAP desde el backend:
+> ⚠️ **Pendiente de verificar:** confirmar que `svc_backend` existe en AD con ese nombre exacto, y que `svc_admin` tiene permiso delegado para modificar el atributo `member` de los grupos `GRP_*` (necesario para el endpoint de cambio de grupo desde la app).
+
+Bind user para queries LDAP desde el backend (lectura):
 ```
-svc-mongo@itu.local / Itu12345!
+svc_backend@itu.local / Itu12345!
+```
+
+Bind user para operaciones de administración (escritura, cambio de grupo):
+```
+svc_admin@itu.local / Itu12345!
 ```
 
 Atributo de login: `sAMAccountName` (ej: `usr.lector`)
-
-### Kerberos (rama feature/backend-api-kerberos)
-```
-SPN:    MSSQLSvc/SERVIDOR-IIS-SQL.itu.local:1433@ITU.LOCAL
-        MSSQLSvc/10.10.10.20:1433
-Cuenta: svc_inventario@itu.local
-Keytab: C:\sqlserver.keytab (en el DC) — entregar a P1 y P3 por canal privado
-```
-> ⚠️ El keytab NUNCA debe subirse a Git.
 
 ---
 
@@ -221,7 +234,7 @@ feature/vms-sql-ad/
 ├── ubicacion-db/
 │   └── init.sql              ← Script de creación de BD y usuario SQL
 ├── active-directory/
-│   └── usuarios-ad.md        ← Documentación de grupos, usuarios y SPNs
+│   └── usuarios-ad.md        ← Documentación de grupos, usuarios y cuentas de servicio
 └── entregables-p2.md         ← Resumen de datos para el equipo
 ```
 
@@ -231,6 +244,5 @@ feature/vms-sql-ad/
 
 | Rama | Responsable | Qué necesita de P2 |
 |---|---|---|
-| `feature/infra-k8s` | P1 | IPs 10.10.10.10 y 10.10.10.20 para Endpoints, keytab por privado, corrección puerto LDAP a 389 |
-| `feature/backend-sql` | Matías (P3) | Cadena de conexión SQL Server, credenciales app_inventario |
-| `feature/backend-api-kerberos` | P3 | SPN, keytab, krb5.conf |
+| `feature/infra-k8s` | P1 | IPs 10.10.10.10 y 10.10.10.20 para Endpoints, corrección puerto LDAP a 389 |
+| `feature/backend-sql` | Matías (P3) | Cadena de conexión SQL Server, credenciales `app_inventario`, credenciales `svc_backend`/`svc_admin` para LDAP |
