@@ -14,33 +14,32 @@ spec:
         app: backend-api
     spec:
       serviceAccountName: sa-backend
+      volumes:
+        - name: secrets-volume
+          secret:
+            secretName: backend-secret
+        - name: mongo-secrets-volume
+          secret:
+            secretName: mongo-secret
       containers:
         - name: backend-api
           image: ghcr.io/romis2799/backend-api:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
+          volumeMounts:
+            - name: secrets-volume
+              mountPath: /etc/secrets
+              readOnly: true
+            - name: mongo-secrets-volume
+              mountPath: /etc/secrets/mongo
+              readOnly: true
           env:
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 configMapKeyRef:
                   name: app-config
                   key: SPRING_DATASOURCE_URL
-            - name: SPRING_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: SQL_USERNAME
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: SQL_PASSWORD
-            - name: SPRING_DATA_MONGODB_URI
-              valueFrom:
-                secretKeyRef:
-                  name: mongo-secret
-                  key: MONGO_URI
             - name: SPRING_LDAP_URLS
               valueFrom:
                 configMapKeyRef:
@@ -51,16 +50,6 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: SPRING_LDAP_BASE
-            - name: SPRING_LDAP_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: LDAP_USER
-            - name: SPRING_LDAP_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: LDAP_PASSWORD
             - name: SPRING_LDAPADMIN_URLS
               valueFrom:
                 configMapKeyRef:
@@ -71,13 +60,3 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: SPRING_LDAPADMIN_BASE
-            - name: SPRING_LDAPADMIN_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: LDAP_ADMIN_USER
-            - name: SPRING_LDAPADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: backend-secret
-                  key: LDAP_ADMIN_PASSWORD
