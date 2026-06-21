@@ -148,3 +148,33 @@ export async function obtenerResponsables() {
 
   return await response.json();
 }
+
+export async function crearUbicacion(ubicacion) {
+  const response = await fetch(`${API_URL}/api/ubicaciones`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(ubicacion)
+  });
+  if (!response.ok) throw new Error("No se pudo crear la ubicación");
+  return await response.json();
+}
+
+export async function crearResponsable(responsable) {
+  const response = await fetch(`${API_URL}/api/responsables`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(responsable)
+  });
+  if (!response.ok) throw new Error("No se pudo crear el responsable");
+  return await response.json();
+}
+
+export async function crearHardware(hardware) {
+  const response = await fetch(`${API_URL}/api/hardware`, {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(hardware)
+  });
+  if (!response.ok) throw new Error("No se pudo crear el hardware");
+  return await response.json();
+}

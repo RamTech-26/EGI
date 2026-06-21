@@ -1,20 +1,15 @@
 package com.inventario.backendapi.sql.service;
 
 import com.inventario.backendapi.dto.*;
+import com.inventario.backendapi.mongo.service.HardwareService;
 import com.inventario.backendapi.sql.model.Equipo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Service
 public class InventarioCompletoServiceImpl implements InventarioCompletoService {
-
-    @Value("${mongo.service.url:http://localhost:8080}")
-    private String mongoServiceUrl;
 
     @Autowired
     private EquipoService equipoService;
@@ -24,6 +19,9 @@ public class InventarioCompletoServiceImpl implements InventarioCompletoService 
 
     @Autowired
     private ResponsableService responsableService;
+
+    @Autowired
+    private HardwareService hardwareService;
 
     @Override
     public InventarioCompletoDTO obtenerInventarioCompleto(Integer idEquipo) throws Exception {
@@ -40,12 +38,12 @@ public class InventarioCompletoServiceImpl implements InventarioCompletoService 
             responsableDTO = responsableService.convertirADTO(equipo.getResponsable());
         }
 
-        // Llamada real al servicio MongoDB de P4
-        String codigoEquipo = equipo.getCodigo();
-        String mongoUrl = mongoServiceUrl + "/api/hardware/" + codigoEquipo;
-        RestTemplate restTemplate = new RestTemplate();
-        HardwareDTO[] componentesArray = restTemplate.getForObject(mongoUrl, HardwareDTO[].class);
-        List<HardwareDTO> componentes = Arrays.asList(componentesArray);
+        List<HardwareDTO> componentes;
+        try {
+            componentes = List.of(hardwareService.getById(equipo.getCodigo()));
+        } catch (Exception e) {
+            componentes = List.of();
+        }
 
         InventarioCompletoDTO dto = new InventarioCompletoDTO();
         dto.setEquipo(equipoDTO);
@@ -55,6 +53,7 @@ public class InventarioCompletoServiceImpl implements InventarioCompletoService 
 
         return dto;
     }
+
     @Override
     public List<InventarioCompletoDTO> obtenerTodos() throws Exception {
         List<Equipo> equipos = equipoService.findAll();

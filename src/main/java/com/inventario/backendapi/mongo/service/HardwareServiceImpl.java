@@ -5,6 +5,8 @@ import com.inventario.backendapi.mongo.model.Hardware;
 import com.inventario.backendapi.mongo.repository.HardwareRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,10 +33,17 @@ public class HardwareServiceImpl implements HardwareService {
         return modelMapper.map(hardware, HardwareDTO.class);
     }
 
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     @Override
     public HardwareDTO create(HardwareDTO dto) {
+        System.out.println("Base de datos MongoDB: " + mongoTemplate.getDb().getName());
+        System.out.println("Guardando hardware: " + dto.getId());
         Hardware hardware = modelMapper.map(dto, Hardware.class);
-        return modelMapper.map(repository.save(hardware), HardwareDTO.class);
+        Hardware saved = repository.save(hardware);
+        System.out.println("Hardware guardado con id: " + saved.getId());
+        return modelMapper.map(saved, HardwareDTO.class);
     }
 
     @Override

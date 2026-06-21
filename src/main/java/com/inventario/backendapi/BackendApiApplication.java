@@ -1,21 +1,16 @@
 package com.inventario.backendapi;
 
 import org.springframework.boot.SpringApplication;
-
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
-import org.springframework.boot.jdbc.autoconfigure.DataSourceTransactionManagerAutoConfiguration;
-import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-@SpringBootApplication(exclude = {
-        DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class,
-        HibernateJpaAutoConfiguration.class,
-})
+@SpringBootApplication
+@EnableJpaRepositories(basePackages = "com.inventario.backendapi.sql.repository")
+@EnableMongoRepositories(basePackages = "com.inventario.backendapi.mongo.repository")
 public class BackendApiApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(BackendApiApplication.class, args);
     }
-
 }
