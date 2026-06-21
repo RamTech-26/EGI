@@ -1,301 +1,535 @@
-# Backend SQL con Kerberos - Módulo P3 (Matías)
+# Proyecto Integrador EGI — Integración Completa
 
-API REST con autenticación LDAP contra Active Directory y delegación Kerberos a SQL Server.
-Parte del Proyecto Integrador EGI.
+## Descripción
 
----
+Sistema de gestión de inventario desarrollado como proyecto integrador, basado en una arquitectura de persistencia políglota y autenticación centralizada mediante Active Directory.
 
-## ¿Qué hace este módulo?
+La solución integra:
 
-- Autentica usuarios contra Active Directory vía LDAP.
-- Consulta los grupos del usuario en AD y los convierte en roles (LECTOR, EDITOR, ADMINISTRADOR).
-- Genera tokens JWT con los roles para autorizar peticiones.
-- Protege los endpoints REST según el rol del usuario.
-- Se conecta a SQL Server usando Kerberos, delegando la identidad del usuario autenticado.
-- SQL Server aplica sus propios permisos granulares según el grupo de AD del usuario.
-- Gestiona ubicaciones, responsables y equipos del inventario.
-- Expone un endpoint combinado con MongoDB (mock temporal).
+* Autenticación LDAP contra Active Directory.
+* Autorización basada en roles mediante JWT.
+* Doble capa de seguridad.
+* Persistencia políglota utilizando SQL Server y MongoDB.
+* Backend desarrollado con Spring Boot.
+* Frontend SPA desarrollado con Vite.
 
 ---
 
-## Tecnologías
+# Arquitectura General
 
-| Tecnología | Uso |
-|------------|-----|
-| Java 21 | Lenguaje principal |
-| Spring Boot 3.x | Framework REST |
-| Spring Security | Autenticación y autorización |
-| Spring LDAP | Conexión y consultas a Active Directory |
-| Spring Data JPA | Acceso a SQL Server |
-| JWT (jjwt 0.12.6) | Tokens de autenticación sin estado |
-| Kerberos (JAAS) | Delegación de identidad a SQL Server |
-| ModelMapper | Conversión entre entidades y DTOs |
-| Lombok | Reducción de código repetitivo |
-| Maven | Gestión de dependencias |
-| MySQL | Base de datos de desarrollo local |
-| SQL Server | Base de datos objetivo (producción) |
-| Docker | Contenerización |
+La aplicación utiliza un backend unificado que integra servicios externos y múltiples fuentes de datos.
 
----
-
-## Estructura del proyecto
 ```text
-src/
-└── main/
-    └── java/
-        └── com/
-            └── inventario/
-                └── backendapi/
-                    ├── auth/
-                    │   ├── AuthController.java
-                    │   ├── JwtUtil.java
-                    │   ├── JwtFilter.java
-                    │   ├── LdapAuthService.java
-                    │   └── SecurityConfig.java
-                    │
-                    ├── config/
-                    │   ├── KerberosDataSourceConfig.java
-                    │   └── ModelMapperConfig.java
-                    │
-                    ├── dto/
-                    │   ├── EquipoDTO.java
-                    │   ├── HardwareDTO.java
-                    │   ├── InventarioCompletoDTO.java
-                    │   ├── LoginRequest.java
-                    │   ├── LoginResponse.java
-                    │   ├── ResponsableDTO.java
-                    │   └── UbicacionDTO.java
-                    │
-                    └── sql/
-                        ├── model/
-                        │   ├── Area.java
-                        │   ├── BaseSql.java
-                        │   ├── Equipo.java
-                        │   ├── Responsable.java
-                        │   └── Ubicacion.java
-                        │
-                        ├── repository/
-                        │   ├── BaseSqlRepository.java
-                        │   ├── EquipoRepository.java
-                        │   ├── ResponsableRepository.java
-                        │   └── UbicacionRepository.java
-                        │
-                        ├── service/
-                        │   ├── BaseSqlService.java
-                        │   ├── BaseSqlServiceImpl.java
-                        │   ├── EquipoService.java
-                        │   ├── EquipoServiceImpl.java
-                        │   ├── InventarioCompletoService.java
-                        │   ├── InventarioCompletoServiceImpl.java
-                        │   ├── ResponsableService.java
-                        │   ├── ResponsableServiceImpl.java
-                        │   ├── UbicacionService.java
-                        │   └── UbicacionServiceImpl.java
-                        │
-                        └── controller/
-                            ├── EquipoController.java
-                            ├── InventarioCompletoController.java
-                            ├── ResponsableController.java
-                            └── UbicacionController.java
+Usuario
+   │
+   ▼
+Frontend Vite (3000)
+   │
+   ▼
+Backend Spring Boot (8080)
+   │
+   ├── Active Directory (LDAP 389)
+   ├── SQL Server (1433)
+   └── MongoDB (27017)
 ```
 
+## Componentes
 
-
----
-
-## Flujo de autenticación y autorización
-
-### 1. Login
-1. El frontend envía POST /api/auth/login con username y password.
-2. LdapAuthService hace un bind LDAP contra Active Directory (puerto 389).
-3. Si las credenciales son válidas, consulta los grupos del usuario en AD.
-4. Convierte los grupos de AD a roles de aplicación:
-    - Profesores → LECTOR
-    - Responsables → EDITOR
-    - Administradores → ADMINISTRADOR
-5. Genera un token JWT firmado que contiene el username y los roles.
-6. Devuelve el token al frontend.
-
-### 2. Peticiones autenticadas
-1. El frontend incluye el token en el header: Authorization: Bearer <token>.
-2. JwtFilter intercepta la petición, valida el token y extrae username y roles.
-3. Establece el contexto de seguridad de Spring con los roles correspondientes.
-4. SecurityConfig verifica si el rol es suficiente para el endpoint solicitado:
-    - GET → LECTOR, EDITOR o ADMINISTRADOR
-    - POST, PUT, DELETE → EDITOR o ADMINISTRADOR
-
-### 3. Conexión a SQL Server con Kerberos
-1. KerberosDataSourceConfig configura el datasource con integratedSecurity=true y authenticationScheme=JavaKerberos.
-2. La JVM usa los archivos krb5.conf y login.conf para autenticarse con el KDC (AD).
-3. El backend obtiene un ticket de servicio Kerberos para SQL Server a nombre del usuario autenticado.
-4. SQL Server recibe el ticket, extrae la identidad del usuario y aplica sus permisos de base de datos según los grupos de AD.
-5. Las contraseñas nunca viajan a SQL Server, solo tickets Kerberos cifrados.
+| Componente       | Función                                       |
+| ---------------- | --------------------------------------------- |
+| Active Directory | Fuente única de identidad y gestión de grupos |
+| SQL Server       | Persistencia de datos estructurados           |
+| MongoDB          | Persistencia de componentes de hardware       |
+| Spring Boot      | Integración, seguridad y lógica de negocio    |
+| Vite SPA         | Interfaz web de usuario                       |
 
 ---
 
-## Perfiles de configuración
+# Flujo de la Aplicación
 
-### Perfil por defecto (desarrollo local con MySQL)
-spring:
-datasource:
-url: jdbc:mysql://localhost:3306/inventario
-username: root
-password: tu_password
-jpa:
-hibernate:
-ddl-auto: update
-ldap:
-urls: ldap://<IP_WAN_PFSENSE>:389
-base: dc=itu,dc=local
-username: cn=svc_backend,cn=Users,dc=itu,dc=local
-password: <PASSWORD>
-
-
-### Perfil kerberos (producción con SQL Server)
-Activar con spring.profiles.active=kerberos en application.yaml o variable de entorno.
-spring:
-datasource:
-url: jdbc:sqlserver://<IP>:1433;databaseName=<BD>;integratedSecurity=true
-jpa:
-hibernate:
-ddl-auto: validate
-java:
-security:
-krb5:
-conf: /etc/krb5.conf
-auth:
-login:
-config: /etc/login.conf
-
+```text
+Usuario
+   ↓
+Frontend (3000)
+   ↓
+POST /api/auth/login
+   ↓
+Backend (8080)
+   ↓
+LDAP Bind contra Active Directory
+   ↓
+Obtención de grupos
+   ↓
+Generación JWT
+   ↓
+Frontend almacena token
+```
 
 ---
 
-## Archivos de configuración Kerberos
+# Autenticación y Autorización
 
-### krb5.conf
-[libdefaults]
-default_realm = <REALM>
-ticket_lifetime = 24h
-forwardable = true
+## Login contra Active Directory
 
-[realms]
-<REALM> = {
-kdc = <IP_KDC>
-admin_server = <IP_KDC>
+1. El usuario ingresa credenciales.
+2. El frontend envía:
+
+```http
+POST /api/auth/login
+```
+
+3. El backend realiza un Bind LDAP.
+4. Si las credenciales son válidas:
+
+   * Obtiene los grupos del usuario.
+   * Traduce grupos a roles.
+   * Genera un JWT firmado.
+5. Devuelve el token al frontend.
+
+### Mapeo de grupos
+
+| Grupo AD          | Rol Aplicación |
+| ----------------- | -------------- |
+| GRP_LECTOR        | LECTOR         |
+| GRP_EDITOR        | EDITOR         |
+| GRP_ADMINISTRADOR | ADMINISTRADOR  |
+
+---
+
+## Autorización JWT
+
+Todas las peticiones protegidas deben incluir:
+
+```http
+Authorization: Bearer <token>
+```
+
+El filtro `JwtFilter`:
+
+* Valida firma.
+* Extrae roles.
+* Genera authorities de Spring Security.
+* Inserta la autenticación en el contexto de seguridad.
+
+---
+
+## Permisos por Endpoint
+
+| Método HTTP        | Roles Permitidos              |
+| ------------------ | ----------------------------- |
+| GET                | LECTOR, EDITOR, ADMINISTRADOR |
+| POST               | EDITOR, ADMINISTRADOR         |
+| PUT                | EDITOR, ADMINISTRADOR         |
+| DELETE             | EDITOR, ADMINISTRADOR         |
+| /api/auth/admin/** | ADMINISTRADOR                 |
+
+---
+
+# Doble Capa de Seguridad
+
+## Capa 1 - Aplicación
+
+Spring Security + JWT
+
+Controla el acceso a los endpoints.
+
+Ejemplo:
+
+* Un usuario LECTOR intenta crear un equipo.
+* Spring Security responde:
+
+```http
+403 Forbidden
+```
+
+antes de acceder a la base de datos.
+
+---
+
+## Capa 2 - Base de Datos
+
+SQL Server + Active Directory (Kerberos - planificado)
+
+El backend utiliza el usuario:
+
+```text
+app_inventario
+```
+
+para conectarse a SQL Server.
+
+La base de datos podrá aplicar permisos adicionales según la identidad delegada del usuario.
+
+---
+
+# Persistencia Políglota
+
+## SQL Server
+
+Base de datos relacional para información estructurada.
+
+Hibernate genera las tablas automáticamente:
+
+```yaml
+spring.jpa.hibernate.ddl-auto=update
+```
+
+---
+
+### Tabla: ubicaciones
+
+| Columna  | Tipo    | Descripción                    |
+| -------- | ------- | ------------------------------ |
+| id       | INT PK  | Autoincremental                |
+| edificio | VARCHAR | Nombre del edificio            |
+| area     | VARCHAR | AULA, LABORATORIO o SECRETARIA |
+
+---
+
+### Tabla: responsables
+
+| Columna  | Tipo    |
+| -------- | ------- |
+| id       | INT PK  |
+| nombre   | VARCHAR |
+| apellido | VARCHAR |
+| email    | VARCHAR |
+| telefono | VARCHAR |
+
+---
+
+### Tabla: equipos
+
+| Columna           | Tipo    |
+| ----------------- | ------- |
+| id                | INT PK  |
+| codigo            | VARCHAR |
+| fecha_adquisicion | DATE    |
+| ubicacion_id      | FK      |
+| responsable_id    | FK      |
+
+---
+
+## MongoDB
+
+Colección:
+
+```text
+hardware
+```
+
+### Documento Hardware
+
+| Campo            | Tipo     |
+| ---------------- | -------- |
+| _id              | ObjectId |
+| id               | String   |
+| fabricante       | String   |
+| modelo           | String   |
+| tipo             | String   |
+| cpu              | String   |
+| ram              | String   |
+| disco            | String   |
+| sistemaOperativo | String   |
+| monitor          | String   |
+| mouse            | String   |
+| teclado          | String   |
+
+---
+
+# Endpoint de Integración
+
+## GET /api/inventario/{id}
+
+Este endpoint integra información de SQL Server y MongoDB.
+
+### Proceso
+
+1. Busca equipo, ubicación y responsable en SQL Server.
+2. Obtiene el código del equipo.
+3. Busca componentes asociados en MongoDB.
+4. Construye un `InventarioCompletoDTO`.
+
+```text
+equipos.codigo (SQL)
+           =
+hardware.id (MongoDB)
+```
+
+No existen Foreign Keys entre ambas bases.
+
+La relación es lógica y se resuelve desde el backend.
+
+---
+
+# Administración de Usuarios Active Directory
+
+Acceso exclusivo para:
+
+```text
+ADMINISTRADOR
+```
+
+## Listar usuarios
+
+```http
+GET /api/auth/admin/usuarios
+```
+
+Devuelve usuarios pertenecientes a:
+
+* GRP_LECTOR
+* GRP_EDITOR
+* GRP_ADMINISTRADOR
+
+---
+
+## Cambiar Rol
+
+```http
+POST /api/auth/admin/cambiar-rol
+```
+
+Acciones:
+
+1. Elimina al usuario de su grupo actual.
+2. Lo agrega al nuevo grupo seleccionado.
+3. Actualiza Active Directory directamente.
+
+No existe persistencia local de usuarios.
+
+---
+
+# DTOs
+
+## UbicacionDTO
+
+```json
+{
+  "id": 1,
+  "edificio": "Central",
+  "area": "AULA"
 }
-
-[domain_realm]
-.<dominio> = <REALM>
-
-### login.conf
-SQLJDBCDriver {
-com.sun.security.auth.module.Krb5LoginModule required
-useKeyTab=true
-keyTab="<RUTA_AL_KEYTAB>"
-principal="<USUARIO_PRINCIPAL>"
-storeKey=true
-debug=false;
-};
-
-
-Importante: Los archivos krb5.conf, login.conf y *.keytab están en .gitignore. Usar las plantillas .example para documentación.
+```
 
 ---
 
-## Endpoints
+## ResponsableDTO
 
-### Autenticación
-| Método | Ruta | Body | Respuesta |
-|--------|------|------|-----------|
-| POST | /api/auth/login | { "username": "...", "password": "..." } | { "token": "eyJ...", "username": "..." } |
-
-### Ubicaciones
-| Método | Ruta | Roles |
-|--------|------|-------|
-| GET | /api/ubicaciones | LECTOR, EDITOR, ADMIN |
-| GET | /api/ubicaciones/{id} | LECTOR, EDITOR, ADMIN |
-| POST | /api/ubicaciones | EDITOR, ADMIN |
-| PUT | /api/ubicaciones/{id} | EDITOR, ADMIN |
-| DELETE | /api/ubicaciones/{id} | EDITOR, ADMIN |
-
-### Responsables
-| Método | Ruta | Roles |
-|--------|------|-------|
-| GET | /api/responsables | LECTOR, EDITOR, ADMIN |
-| GET | /api/responsables/{id} | LECTOR, EDITOR, ADMIN |
-| POST | /api/responsables | EDITOR, ADMIN |
-| PUT | /api/responsables/{id} | EDITOR, ADMIN |
-| DELETE | /api/responsables/{id} | EDITOR, ADMIN |
-
-### Equipos
-| Método | Ruta | Roles |
-|--------|------|-------|
-| GET | /api/equipos | LECTOR, EDITOR, ADMIN |
-| GET | /api/equipos/{id} | LECTOR, EDITOR, ADMIN |
-| POST | /api/equipos | EDITOR, ADMIN |
-| PUT | /api/equipos/{id} | EDITOR, ADMIN |
-| DELETE | /api/equipos/{id} | EDITOR, ADMIN |
-
-### Inventario Completo
-| Método | Ruta | Roles |
-|--------|------|-------|
-| GET | /api/inventario/{idEquipo} | LECTOR, EDITOR, ADMIN |
+```json
+{
+  "id": 1,
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "email": "juan@itu.local",
+  "telefono": "123456"
+}
+```
 
 ---
 
-## Docker
+## EquipoDTO (Lectura)
 
-### Construcción de la imagen
-
-docker build -t backend-api-kerberos .
-
-
-### Ejecución del contenedor
-
-docker run -p 8080:8080
--e JAVA_OPTS="-Djava.security.krb5.conf=/etc/krb5.conf -Djava.security.auth.login.config=/etc/login.conf"
--v /ruta/local/krb5.conf:/etc/krb5.conf
--v /ruta/local/login.conf:/etc/login.conf
--v /ruta/local/backend.keytab:/etc/krb5.keytab
-backend-api-kerberos
-
+```json
+{
+  "id": 1,
+  "codigo": "PC-01",
+  "fechaAdquisicion": "2025-03-15",
+  "ubicacionId": 1,
+  "responsableId": 1
+}
+```
 
 ---
 
-## Checklist de implementación
+## EquipoDTO (Creación / Edición)
 
-### Completado
-- [x] Estructura del proyecto Spring Boot
-- [x] Entidades JPA y repositorios
-- [x] CRUD completo (ubicaciones, responsables, equipos)
-- [x] Endpoint combinado /api/inventario/{idEquipo} (mock MongoDB)
-- [x] DTOs compartidos unificados en feature/backend-base
-- [x] Autenticación LDAP contra Active Directory
-- [x] Roles en JWT (LECTOR, EDITOR, ADMINISTRADOR)
-- [x] Protección de endpoints por rol
-- [x] Configuración Kerberos (krb5.conf, login.conf, KerberosDataSourceConfig)
-- [x] Conexión a SQL Server con autenticación integrada Windows
-- [x] Dockerfile multi-stage con soporte Kerberos
-- [x] .gitignore para archivos sensibles (keytab, krb5.conf, login.conf, application.yaml)
-
-### Pendiente (depende de P2)
-- [ ] Datos reales de AD (IP WAN pfSense, dominio, base DN, usuario de servicio, contraseña)
-- [ ] Keytab para el SPN de SQL Server
-- [ ] SPN registrado en AD (MSSQLSvc/<HOST>:1433)
-- [ ] NAT en pfSense (puertos 389 y 1433)
-- [ ] Pruebas de integración reales
-
-### Pendiente (depende de P4)
-- [ ] Reemplazar mock de HardwareDTO por llamada real al servicio MongoDB
-
-### Pendiente (depende de P1)
-- [ ] Manifiestos Kubernetes con Secrets para keytab y archivos Kerberos
-- [ ] Despliegue en Minikube
+```json
+{
+  "codigo": "PC-01",
+  "fechaAdquisicion": "2025-03-15",
+  "ubicacion": {
+    "id": 1
+  },
+  "responsable": {
+    "id": 1
+  }
+}
+```
 
 ---
 
-## Rama
-feature/backend-api-kerberos
+## HardwareDTO
 
-## Autor
-Matías (P3) - Proyecto Integrador EGI
+```json
+{
+  "id": "PC-01",
+  "fabricante": "Dell",
+  "modelo": "OptiPlex 3000",
+  "tipo": "desktop",
+  "cpu": "i5-12400",
+  "ram": "16GB",
+  "disco": "512GB SSD",
+  "sistemaOperativo": "Windows 11",
+  "monitor": "Dell 24\"",
+  "mouse": "Dell",
+  "teclado": "Dell"
+}
+```
+
+---
+
+## InventarioCompletoDTO
+
+```json
+{
+  "equipo": {},
+  "ubicacion": {},
+  "responsable": {},
+  "componentes": []
+}
+```
+
+---
+
+## LoginRequest
+
+```json
+{
+  "username": "usr.admin",
+  "password": "Itu12345!"
+}
+```
+
+---
+
+## LoginResponse
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "username": "usr.admin",
+  "roles": [
+    "ADMINISTRADOR"
+  ]
+}
+```
+
+---
+
+# Estructura del Proyecto
+
+```text
+src/main/java/com/inventario/backendapi/
+├── auth/
+│   ├── AuthController.java
+│   ├── JwtUtil.java
+│   ├── JwtFilter.java
+│   ├── LdapAuthService.java
+│   ├── LdapAdminService.java
+│   ├── LdapConfig.java
+│   └── SecurityConfig.java
+│
+├── config/
+│   ├── ModelMapperConfig.java
+│   └── MongoConfig.java
+│
+├── dto/
+│
+├── mongo/
+│   ├── controller/
+│   │   └── HardwareController.java
+│   ├── model/
+│   │   └── Hardware.java
+│   ├── repository/
+│   │   └── HardwareRepository.java
+│   └── service/
+│       ├── HardwareService.java
+│       └── HardwareServiceImpl.java
+│
+└── sql/
+    ├── model/
+    ├── repository/
+    ├── service/
+    └── controller/
+```
+
+---
+
+# Usuarios de Active Directory
+
+| Usuario        | Contraseña | Grupo             | Rol           | Uso                  |
+| -------------- | ---------- | ----------------- | ------------- | -------------------- |
+| usr.admin      | Itu12345!  | GRP_ADMINISTRADOR | ADMINISTRADOR | Administración total |
+| usr.editor     | Itu12345!  | GRP_EDITOR        | EDITOR        | Lectura y escritura  |
+| usr.lector     | Itu12345!  | GRP_LECTOR        | LECTOR        | Solo lectura         |
+| svc_backend    | Itu12345!  | -                 | -             | Bind LDAP            |
+| svc_admin      | Itu12345!  | GRP_ADMINISTRADOR | -             | Administración AD    |
+| app_inventario | Itu12345!  | -                 | -             | Conexión SQL Server  |
+
+---
+
+# Variables de Entorno
+
+| Variable            | Descripción                   | Ejemplo                                               |
+| ------------------- | ----------------------------- | ----------------------------------------------------- |
+| SQL_USERNAME        | Usuario SQL Server            | app_inventario                                        |
+| SQL_PASSWORD        | Contraseña SQL Server         | Itu12345!                                             |
+| LDAP_HOST           | IP del controlador de dominio | 192.168.100.50                                        |
+| LDAP_PORT           | Puerto LDAP                   | 389                                                   |
+| LDAP_BASE           | Base DN                       | dc=itu,dc=local                                       |
+| LDAP_USER           | Usuario LDAP                  | [svc_backend@itu.local](mailto:svc_backend@itu.local) |
+| LDAP_PASSWORD       | Contraseña LDAP               | Itu12345!                                             |
+| LDAP_ADMIN_USER     | Usuario administrador LDAP    | [svc_admin@itu.local](mailto:svc_admin@itu.local)     |
+| LDAP_ADMIN_PASSWORD | Contraseña administrador LDAP | Itu12345!                                             |
+
+---
+
+# Configuración de Ejemplo
+
+```env
+SQL_USERNAME=app_inventario
+SQL_PASSWORD=Itu12345!
+
+LDAP_HOST=192.168.100.50
+LDAP_PORT=389
+LDAP_BASE=dc=itu,dc=local
+
+LDAP_USER=svc_backend@itu.local
+LDAP_PASSWORD=Itu12345!
+
+LDAP_ADMIN_USER=svc_admin@itu.local
+LDAP_ADMIN_PASSWORD=Itu12345!
+```
+
+---
+
+# Rama de Desarrollo
+
+```text
+prueba-integracion-matias
+```
+
+---
+
+# Tecnologías Utilizadas
+
+* Java 21
+* Spring Boot
+* Spring Security
+* Spring Data JPA
+* Spring LDAP
+* JWT
+* SQL Server
+* MongoDB
+* Active Directory
+* Hibernate
+* ModelMapper
+* Maven
+* Vite
+* JavaScript
+
+```
+
+**Proyecto Integrador EGI – Inventario con Active Directory, SQL Server y MongoDB**
+```
