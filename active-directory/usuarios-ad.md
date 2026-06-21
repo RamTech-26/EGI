@@ -2,6 +2,8 @@
 **Proyecto Integrador EGI — Ecosistema de Inventario Seguro**  
 Responsable: Franco (P2) — Bases de Datos y VMs Externas
 
+> **Nota de versión:** Se descartó la autenticación SQL vía Kerberos por errores persistentes de `PortUnreachableException` en UDP/88. El proyecto usa **SQL Authentication** (login `app_inventario`) para la conexión a SQL Server, y **LDAP simple bind** (puerto 389) para la autenticación de usuarios y operaciones de administración contra AD.
+
 ---
 
 ## Dominio
@@ -38,16 +40,24 @@ New-ADGroup -Name "GRP_ADMINISTRADOR" -GroupScope Global -GroupCategory Security
 
 ## Cuentas de Servicio
 
-| Usuario         | Propósito                        | Contraseña  |
-|-----------------|----------------------------------|-------------|
-| `svc_inventario`| SQL Server — autenticación Kerberos | `Itu12345!` |
-| `svc-mongo`     | MongoDB Enterprise — LDAP auth   | `Itu12345!` |
+| Usuario         | Propósito                                              | Contraseña  |
+|-----------------|---------------------------------------------------------|-------------|
+| `svc_backend`   | Bind LDAP de **lectura** — login y consulta de grupos    | `Itu12345!` |
+| `svc_admin`     | Bind LDAP de **escritura** — cambio de grupo de usuarios | `Itu12345!` |
+| `svc-mongo`     | MongoDB — LDAP auth                                      | `Itu12345!` |
+
+> ⚠️ **Pendiente de verificar:** confirmar que `svc_backend` existe en AD con el nombre exacto que usa el backend (`application.yaml` → `spring.ldap.username`), y que `svc_admin` tiene permiso delegado para modificar el atributo `member` de los grupos `GRP_*` (necesario para el endpoint de cambio de grupo).
 
 ### Comandos de creación
 
 ```powershell
-New-ADUser -Name "svc_inventario" -SamAccountName "svc_inventario" `
-    -UserPrincipalName "svc_inventario@itu.local" `
+New-ADUser -Name "svc_backend" -SamAccountName "svc_backend" `
+    -UserPrincipalName "svc_backend@itu.local" `
+    -AccountPassword (ConvertTo-SecureString "Itu12345!" -AsPlainText -Force) `
+    -PasswordNeverExpires $true -Enabled $true
+
+New-ADUser -Name "svc_admin" -SamAccountName "svc_admin" `
+    -UserPrincipalName "svc_admin@itu.local" `
     -AccountPassword (ConvertTo-SecureString "Itu12345!" -AsPlainText -Force) `
     -PasswordNeverExpires $true -Enabled $true
 
@@ -91,53 +101,16 @@ Add-ADGroupMember -Identity "GRP_ADMINISTRADOR" -Members "usr.admin"
 
 ---
 
-## SPN Registrado (Kerberos para SQL Server)
-
-```
-MSSQLSvc/SERVIDOR-IIS-SQL.itu.local:1433
-MSSQLSvc/10.10.10.20:1433
-```
-
-### Comandos de registro
-
-```powershell
-setspn -A MSSQLSvc/SERVIDOR-IIS-SQL.itu.local:1433 svc_inventario
-setspn -A MSSQLSvc/10.10.10.20:1433 svc_inventario
-```
-
-### Verificación
-
-```powershell
-setspn -L svc_inventario
-```
-
----
-
-## Keytab
-
-```
-Ruta: C:\sqlserver.keytab  (en el DC)
-```
-
-> ⚠️ El keytab **NUNCA** debe subirse al repositorio Git.  
-> Entregarlo a P1 y P3 por canal privado.
-
-### Comando de generación
-
-```powershell
-ktpass -princ MSSQLSvc/SERVIDOR-IIS-SQL.itu.local:1433@ITU.LOCAL `
-    -mapuser svc_inventario@ITU.LOCAL -crypto ALL `
-    -ptype KRB5_NT_PRINCIPAL -pass Itu12345! `
-    -out C:\sqlserver.keytab
-```
-
----
-
 ## Atributo LDAP para autenticación
 
 El backend usa `sAMAccountName` para identificar usuarios (ej: `usr.lector`).
 
-Bind user para queries LDAP:
+Bind user de lectura para login y consulta de grupos:
 ```
-svc-mongo@itu.local / Itu12345!
+svc_backend@itu.local / Itu12345!
+```
+
+Bind user de escritura para cambio de grupo (operación de administrador):
+```
+svc_admin@itu.local / Itu12345!
 ```
