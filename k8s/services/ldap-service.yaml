@@ -8,7 +8,7 @@ spec:
     - protocol: TCP
       port: 389
       targetPort: 389
-  type: Cluster0IP
+  type: ClusterIP
 ---
 apiVersion: v1
 kind: Endpoints
