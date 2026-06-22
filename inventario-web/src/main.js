@@ -337,7 +337,7 @@ function renderAltaUbicacion() {
       <form id="form-ubicacion" class="form-grid">
         <select id="edificio" required>
           <option value="">Seleccionar edificio</option>
-          <option value="CEDE_CENTRAL">Cede Central</option>
+          <option value="SEDE_CENTRAL">Sede Central</option>
           <option value="CAMPUS_TIC">ITU Campus TIC</option>
         </select>
         <select id="area" required>

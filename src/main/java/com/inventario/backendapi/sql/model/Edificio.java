@@ -1,6 +1,6 @@
 package com.inventario.backendapi.sql.model;
 
 public enum Edificio {
-    CEDE_CENTRAL,
+    SEDE_CENTRAL,
     CAMPUS_TIC
 }
