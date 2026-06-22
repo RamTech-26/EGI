@@ -60,3 +60,33 @@ spec:
                 configMapKeyRef:
                   name: app-config
                   key: SPRING_LDAPADMIN_BASE
+            - name: SQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_USERNAME
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_PASSWORD
+            - name: SPRING_LDAP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_USER
+            - name: SPRING_LDAP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_PASSWORD
+            - name: SPRING_LDAPADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_ADMIN_USER
+            - name: SPRING_LDAPADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: LDAP_ADMIN_PASSWORD
