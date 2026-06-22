@@ -42,7 +42,10 @@ public class EquipoServiceImpl extends BaseSqlServiceImpl<Equipo, Integer> imple
         if (equipo.getResponsable() != null) {
             dto.setNombre(equipo.getResponsable().getNombre());
             dto.setApellido(equipo.getResponsable().getApellido());
+            dto.setTipo(equipo.getResponsable().getTipo() != null ? equipo.getResponsable().getTipo().name() : null);
         }
+        dto.setFechaMantenimiento(equipo.getFechaMantenimiento());
+        dto.setFechaDevolucion(equipo.getFechaDevolucion());
         return dto;
     }
 

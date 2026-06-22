@@ -13,4 +13,5 @@ public class ResponsableDTO {
     private String apellido;
     private String email;
     private String telefono;
+    private String tipo;
 }

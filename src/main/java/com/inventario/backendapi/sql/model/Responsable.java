@@ -16,4 +16,6 @@ public class Responsable extends BaseSql {
     private String apellido;
     private String email;
     private String telefono;
+    @Enumerated(EnumType.STRING)
+    private TipoResponsable tipo;
 }

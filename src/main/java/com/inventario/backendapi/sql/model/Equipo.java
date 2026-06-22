@@ -12,9 +12,10 @@ import java.time.LocalDate;
 @Setter
 @Table(name = "equipos")
 public class Equipo extends BaseSql {
-
     private String codigo;
     private LocalDate fechaAdquisicion;
+    private LocalDate fechaMantenimiento;
+    private LocalDate fechaDevolucion;
 
     @ManyToOne
     @JoinColumn(name = "ubicacion_id")

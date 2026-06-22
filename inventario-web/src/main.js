@@ -146,7 +146,9 @@ function renderTablaEquipos(equipos) {
         <tr>
           <th>ID</th>
           <th>Código</th>
-          <th>Fecha adquisición</th>
+          <th>Fecha adq.</th>
+          <th>Mantenimiento</th>
+          <th>Devolución</th>
           <th>Ubicación</th>
           <th>Responsable</th>
           <th>Acciones</th>
@@ -157,9 +159,11 @@ function renderTablaEquipos(equipos) {
           <tr>
             <td>${equipo.id}</td>
             <td>${equipo.codigo}</td>
-            <td>${equipo.fechaAdquisicion}</td>
+            <td>${equipo.fechaAdquisicion || ''}</td>
+            <td>${equipo.fechaMantenimiento || ''}</td>
+            <td>${equipo.fechaDevolucion || ''}</td>
             <td>${equipo.edificio || ''} - ${equipo.area || ''} - ${equipo.numero || ''}</td>
-            <td>${equipo.nombre || ''} ${equipo.apellido || ''}</td>
+            <td>${equipo.nombre || ''} ${equipo.apellido || ''} (${equipo.tipo || ''})</td>
             <td>
               <button class="btn-ver" data-id="${equipo.id}">Ver inventario</button>
               <button class="btn-eliminar" data-id="${equipo.id}">Eliminar</button>
@@ -256,25 +260,84 @@ async function renderAltaEquipo() {
       <h2>Alta de equipo</h2>
       <form id="form-alta" class="form-grid">
         <h3>Datos del equipo (SQL Server)</h3>
-        <input id="codigo" placeholder="Código: PC-01" required />
-        <input id="fechaAdquisicion" type="date" required />
-        <select id="ubicacionId" required>
-          <option value="">Cargando ubicaciones...</option>
-        </select>
-        <select id="responsableId" required>
-          <option value="">Cargando responsables...</option>
-        </select>
+      
+        <div class="form-field">
+          <label for="codigo">Código</label>
+          <input id="codigo" placeholder="PC-01" required />
+        </div>
+      
+        <div class="form-field">
+          <label for="fechaAdquisicion">Fecha de adquisición</label>
+          <input id="fechaAdquisicion" type="date" required />
+        </div>
+      
+        <div class="form-field">
+          <label for="fechaMantenimiento">Fecha de mantenimiento</label>
+          <input id="fechaMantenimiento" type="date" />
+        </div>
+      
+        <div class="form-field">
+          <label for="fechaDevolucion">Fecha de devolución</label>
+          <input id="fechaDevolucion" type="date" />
+        </div>
+      
+        <div class="form-field">
+          <label for="ubicacionId">Ubicación</label>
+          <select id="ubicacionId" required>
+            <option value="">Cargando ubicaciones...</option>
+          </select>
+        </div>
+      
+        <div class="form-field">
+          <label for="responsableId">Responsable</label>
+          <select id="responsableId" required>
+            <option value="">Cargando responsables...</option>
+          </select>
+        </div>
+      
         <h3>Datos de hardware (MongoDB)</h3>
-        <input id="hw-fabricante" placeholder="Fabricante (ej: Dell)" required />
-        <input id="hw-modelo" placeholder="Modelo (ej: OptiPlex 3000)" required />
-        <input id="hw-tipo" placeholder="Tipo (ej: desktop, notebook)" required />
-        <input id="hw-cpu" placeholder="CPU (ej: i5-12400)" required />
-        <input id="hw-ram" placeholder="RAM (ej: 16GB)" required />
-        <input id="hw-disco" placeholder="Disco (ej: 512GB SSD)" required />
-        <input id="hw-so" placeholder="Sistema Operativo (ej: Windows 11)" required />
-        <input id="hw-monitor" placeholder="Monitor (ej: Dell 24&quot;)" />
-        <input id="hw-mouse" placeholder="Mouse (ej: Dell)" />
-        <input id="hw-teclado" placeholder="Teclado (ej: Dell)" />
+      
+        <div class="form-field">
+          <label for="hw-fabricante">Fabricante</label>
+          <input id="hw-fabricante" placeholder="Dell" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-modelo">Modelo</label>
+          <input id="hw-modelo" placeholder="OptiPlex 3000" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-tipo">Tipo</label>
+          <input id="hw-tipo" placeholder="desktop / notebook" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-cpu">CPU</label>
+          <input id="hw-cpu" placeholder="i5-12400" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-ram">RAM</label>
+          <input id="hw-ram" placeholder="16GB" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-disco">Disco</label>
+          <input id="hw-disco" placeholder="512GB SSD" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-so">Sistema Operativo</label>
+          <input id="hw-so" placeholder="Windows 11" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-monitor">Monitor</label>
+          <input id="hw-monitor" placeholder="Dell 24&quot;" />
+        </div>
+        <div class="form-field">
+          <label for="hw-mouse">Mouse</label>
+          <input id="hw-mouse" placeholder="Dell" />
+        </div>
+        <div class="form-field">
+          <label for="hw-teclado">Teclado</label>
+          <input id="hw-teclado" placeholder="Dell" />
+        </div>
+      
         <button type="submit">Guardar equipo completo</button>
       </form>
     </section>
@@ -302,6 +365,8 @@ async function renderAltaEquipo() {
     const equipo = {
       codigo,
       fechaAdquisicion: document.querySelector("#fechaAdquisicion").value,
+      fechaMantenimiento: document.querySelector("#fechaMantenimiento").value || null,
+      fechaDevolucion: document.querySelector("#fechaDevolucion").value || null,
       ubicacion: { id: Number(document.querySelector("#ubicacionId").value) },
       responsable: { id: Number(document.querySelector("#responsableId").value) }
     };
@@ -378,6 +443,12 @@ function renderAltaResponsable() {
         <input id="apellido" placeholder="Apellido" required />
         <input id="email" type="email" placeholder="Email (ej: juan@itu.local)" required />
         <input id="telefono" placeholder="Teléfono" required />
+        <select id="tipo" required>
+          <option value="">Seleccionar tipo</option>
+          <option value="ALUMNO">Alumno</option>
+          <option value="DOCENTE">Docente</option>
+          <option value="TECNICO">Técnico</option>
+        </select>
         <button type="submit">Guardar responsable</button>
       </form>
     </section>
@@ -388,7 +459,8 @@ function renderAltaResponsable() {
       nombre: document.querySelector("#nombre").value.trim(),
       apellido: document.querySelector("#apellido").value.trim(),
       email: document.querySelector("#email").value.trim(),
-      telefono: document.querySelector("#telefono").value.trim()
+      telefono: document.querySelector("#telefono").value.trim(),
+      tipo: document.querySelector("#tipo").value
     };
     try {
       await crearResponsable(responsable);

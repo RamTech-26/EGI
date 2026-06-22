@@ -632,3 +632,15 @@ select:focus {
     flex-direction: column;
   }
 }
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+}

@@ -12,13 +12,15 @@ public class EquipoDTO {
     private Integer id;
     private String codigo;
     private LocalDate fechaAdquisicion;
+    private LocalDate fechaMantenimiento;
+    private LocalDate fechaDevolucion;
     private Integer ubicacionId;
     private Integer responsableId;
 
-    // Nuevos campos legibles
     private String edificio;
     private String area;
     private Integer numero;
     private String nombre;
     private String apellido;
+    private String tipo;
 }
