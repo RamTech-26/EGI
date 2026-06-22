@@ -1,4 +1,4 @@
-import "./style.css";
+﻿import "./style.css";
 import {
   login,
   logout,
@@ -147,8 +147,8 @@ function renderTablaEquipos(equipos) {
           <th>ID</th>
           <th>Código</th>
           <th>Fecha adquisición</th>
-          <th>Ubicación ID</th>
-          <th>Responsable ID</th>
+          <th>Ubicación</th>
+          <th>Responsable</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -158,8 +158,8 @@ function renderTablaEquipos(equipos) {
             <td>${equipo.id}</td>
             <td>${equipo.codigo}</td>
             <td>${equipo.fechaAdquisicion}</td>
-            <td>${equipo.ubicacionId}</td>
-            <td>${equipo.responsableId}</td>
+            <td>${equipo.edificio || ''} - ${equipo.area || ''} - ${equipo.numero || ''}</td>
+            <td>${equipo.nombre || ''} ${equipo.apellido || ''}</td>
             <td>
               <button class="btn-ver" data-id="${equipo.id}">Ver inventario</button>
               <button class="btn-eliminar" data-id="${equipo.id}">Eliminar</button>
@@ -335,13 +335,18 @@ function renderAltaUbicacion() {
     <section class="panel">
       <h2>Alta de ubicación</h2>
       <form id="form-ubicacion" class="form-grid">
-        <input id="edificio" placeholder="Edificio (ej: Central)" required />
+        <select id="edificio" required>
+          <option value="">Seleccionar edificio</option>
+          <option value="CEDE_CENTRAL">Cede Central</option>
+          <option value="CAMPUS_TIC">ITU Campus TIC</option>
+        </select>
         <select id="area" required>
           <option value="">Seleccionar área</option>
           <option value="AULA">AULA</option>
           <option value="LABORATORIO">LABORATORIO</option>
           <option value="SECRETARIA">SECRETARIA</option>
         </select>
+        <input id="numeroArea" type="number" placeholder="Número de área (ej: 1)" required />
         <button type="submit">Guardar ubicación</button>
       </form>
     </section>
@@ -349,8 +354,9 @@ function renderAltaUbicacion() {
   document.querySelector("#form-ubicacion").addEventListener("submit", async (event) => {
     event.preventDefault();
     const ubicacion = {
-      edificio: document.querySelector("#edificio").value.trim(),
-      area: document.querySelector("#area").value
+      edificio: document.querySelector("#edificio").value,
+      area: document.querySelector("#area").value,
+      numeroArea: Number(document.querySelector("#numeroArea").value)
     };
     try {
       await crearUbicacion(ubicacion);

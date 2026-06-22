@@ -13,7 +13,9 @@ import lombok.Setter;
 @Table(name = "ubicaciones")
 public class Ubicacion extends BaseSql {
 
-    private String edificio;
+    @Enumerated(EnumType.STRING)
+    private Edificio edificio;
     @Enumerated(EnumType.STRING)
     private Area area;
+    private Integer numeroArea;
 }

@@ -33,8 +33,19 @@ public class EquipoServiceImpl extends BaseSqlServiceImpl<Equipo, Integer> imple
         EquipoDTO dto = modelMapper.map(equipo, EquipoDTO.class);
         dto.setUbicacionId(equipo.getUbicacion() != null ? equipo.getUbicacion().getId() : null);
         dto.setResponsableId(equipo.getResponsable() != null ? equipo.getResponsable().getId() : null);
+
+        if (equipo.getUbicacion() != null) {
+            dto.setEdificio(equipo.getUbicacion().getEdificio().name());
+            dto.setArea(equipo.getUbicacion().getArea().name());
+            dto.setNumero(equipo.getUbicacion().getNumeroArea());
+        }
+        if (equipo.getResponsable() != null) {
+            dto.setNombre(equipo.getResponsable().getNombre());
+            dto.setApellido(equipo.getResponsable().getApellido());
+        }
         return dto;
     }
+
     @Override
     public Equipo save(Equipo equipo) throws Exception {
         if (equipo.getUbicacion() != null && equipo.getUbicacion().getId() != null) {

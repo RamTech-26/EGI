@@ -14,4 +14,11 @@ public class EquipoDTO {
     private LocalDate fechaAdquisicion;
     private Integer ubicacionId;
     private Integer responsableId;
+
+    // Nuevos campos legibles
+    private String edificio;
+    private String area;
+    private Integer numero;
+    private String nombre;
+    private String apellido;
 }

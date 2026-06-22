@@ -11,4 +11,5 @@ public class UbicacionDTO {
     private Integer id;
     private String edificio;
     private String area;
+    private Integer numeroArea;
 }
