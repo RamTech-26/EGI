@@ -148,7 +148,7 @@ antes de acceder a la base de datos.
 
 ## Capa 2 - Base de Datos
 
-SQL Server + Active Directory (Kerberos - planificado)
+SQL Server + Active Directory (SQL Authentication + LDAP simple bind — Kerberos descartado por errores de PortUnreachableException en UDP/88)
 
 El backend utiliza el usuario:
 
