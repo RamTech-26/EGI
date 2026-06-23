@@ -23,10 +23,10 @@ La aplicación utiliza un backend unificado que integra servicios externos y mú
 Usuario
    │
    ▼
-Frontend Vite (3000)
+Frontend Vite (NodePort 30000)
    │
    ▼
-Backend Spring Boot (8080)
+Backend Spring Boot (NodePort 30001)
    │
    ├── Active Directory (LDAP 389)
    ├── SQL Server (1433)
@@ -50,11 +50,11 @@ Backend Spring Boot (8080)
 ```text
 Usuario
    ↓
-Frontend (3000)
+Frontend (NodePort 30000)
    ↓
 POST /api/auth/login
    ↓
-Backend (8080)
+Backend (NodePort 30001)
    ↓
 LDAP Bind contra Active Directory
    ↓
@@ -188,26 +188,28 @@ spring.jpa.hibernate.ddl-auto=update
 
 ### Tabla: responsables
 
-| Columna  | Tipo                                |
-| -------- | ------------------------------------ |
-| id       | INT PK                              |
-| nombre   | VARCHAR                             |
-| apellido | VARCHAR                             |
-| email    | VARCHAR                             |
-| telefono | VARCHAR                             |
-| tipo     | VARCHAR (enum: ALUMNO, DOCENTE, TECNICO) |
+| Columna  | Tipo    | Descripcion                |
+| -------- | ------- | --------------------------- |
+| id       | INT PK  | Autoincremental             |
+| nombre   | VARCHAR | Nombre del responsable      |
+| apellido | VARCHAR | Apellido del responsable    |
+| email    | VARCHAR | Correo de contacto          |
+| telefono | VARCHAR | Telefono de contacto        |
+| tipo     | VARCHAR | ALUMNO, DOCENTE o TECNICO   |
 
 ---
 
 ### Tabla: equipos
 
-| Columna           | Tipo    |
-| ----------------- | ------- |
-| id                | INT PK  |
-| codigo            | VARCHAR |
-| fecha_adquisicion | DATE    |
-| ubicacion_id      | FK      |
-| responsable_id    | FK      |
+| Columna             | Tipo    |
+| ------------------- | ------- |
+| id                  | INT PK  |
+| codigo              | VARCHAR |
+| fecha_adquisicion   | DATE    |
+| fecha_mantenimiento | DATE    |
+| fecha_devolucion    | DATE    |
+| ubicacion_id        | FK      |
+| responsable_id      | FK      |
 
 ---
 
@@ -383,8 +385,8 @@ No existe persistencia local de usuarios.
   "disco": "512GB SSD",
   "sistemaOperativo": "Windows 11",
   "monitor": "Dell 24\"",
-  "mouse": "Dell",
-  "teclado": "Dell"
+  "mouse": "Logitech M90",
+  "teclado": "Logitech K120"
 }
 ```
 
@@ -489,9 +491,9 @@ src/main/java/com/inventario/backendapi/
 | LDAP_HOST           | IP del controlador de dominio | 192.168.100.50                                        |
 | LDAP_PORT           | Puerto LDAP                   | 389                                                   |
 | LDAP_BASE           | Base DN                       | dc=itu,dc=local                                       |
-| LDAP_USER           | Usuario LDAP                  | [<LDAP_BIND_USER>](mailto:<LDAP_BIND_USER>) |
+| LDAP_USER           | Usuario LDAP                  | <LDAP_BIND_USER> |
 | LDAP_PASSWORD       | Contraseña LDAP               | <PASSWORD_ITU>                                             |
-| LDAP_ADMIN_USER     | Usuario administrador LDAP    | [<LDAP_ADMIN_USER>](mailto:<LDAP_ADMIN_USER>)     |
+| LDAP_ADMIN_USER     | Usuario administrador LDAP    | <LDAP_ADMIN_USER>     |
 | LDAP_ADMIN_PASSWORD | Contraseña administrador LDAP | <PASSWORD_ITU>                                             |
 
 ---
