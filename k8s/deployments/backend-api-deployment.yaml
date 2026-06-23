@@ -23,7 +23,7 @@ spec:
             secretName: mongo-secret
       containers:
         - name: backend-api
-          image: ghcr.io/romis2799/backend-api:v3
+          image: ghcr.io/romis2799/backend-api:v4
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
