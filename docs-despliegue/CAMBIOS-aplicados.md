@@ -279,3 +279,28 @@ kubectl exec -n inventario <pod-mongo> -- mongo admin -u app-inventario -p <PASS
 **Importante:** repetir este paso cada vez que se recree el PVC de Mongo o el cluster, ya que mongo:4.4 pelado no ejecuta init-mongo.js automaticamente. Pendiente: usar inventario-db/Dockerfile (que si lo monta) en el deployment.
 
 **Diagnostico util para casos similares:** si Spring Security da 403 sin razon aparente (mismo resultado con o sin token), sospechar de una excepcion de aplicacion enmascarada como 403. Confirmar viendo si el metodo del controller aparece en el stack trace de los logs.
+
+---
+
+## 12. Nota sobre credenciales en scripts ejecutables vs. documentacion
+
+Tras la sanitizacion de credenciales reales en la documentacion (ver
+commit 36554b4), se decidio conscientemente **mantener** las credenciales
+reales en dos archivos que NO son documentacion sino scripts ejecutables:
+
+- `ubicacion-db/01_schema.sql` (crea el login `app_inventario` en SQL Server)
+- `inventario-db/init-mongo.js` (crea el usuario `app-inventario` en MongoDB)
+
+**Por que se mantienen:** son herramientas, no texto explicativo. Reemplazar
+el valor real por un placeholder los deja no-funcionales para copiar y
+ejecutar directo, obligando a cada miembro del equipo a editarlos a mano
+antes de cada uso.
+
+**Distincion aplicada en todo el repo:**
+- Documentacion (`docs-despliegue/`, `README.md`, `active-directory/`):
+  SIN credenciales reales, solo placeholders descriptivos.
+- Scripts ejecutables (`01_schema.sql`, `init-mongo.js`): CON credenciales
+  reales, porque son herramientas de uso interno del equipo, no material
+  de lectura/distribucion.
+- Secrets de Kubernetes (`k8s/secrets/*.yaml` reales, no `.example`):
+  NUNCA en git, via .gitignore, sin excepcion.
