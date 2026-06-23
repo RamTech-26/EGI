@@ -23,8 +23,8 @@ spec:
             secretName: mongo-secret
       containers:
         - name: backend-api
-          image: ghcr.io/romis2799/backend-api:v2
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/romis2799/backend-api:v3
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           volumeMounts:
@@ -74,21 +74,24 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: backend-secret
-                  key: LDAP_USER
+                  key: SPRING_LDAP_USERNAME
             - name: SPRING_LDAP_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: backend-secret
-                  key: LDAP_PASSWORD
+                  key: SPRING_LDAP_PASSWORD
             - name: SPRING_LDAPADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: backend-secret
-                  key: LDAP_ADMIN_USER
+                  key: SPRING_LDAPADMIN_USERNAME
             - name: SPRING_LDAPADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: backend-secret
-                  key: LDAP_ADMIN_PASSWORD
+                  key: SPRING_LDAPADMIN_PASSWORD
             - name: SPRING_DATA_MONGODB_URI
-              value: "mongodb://app-inventario:password123@inventario-db:27017/inventario"
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SPRING_DATA_MONGODB_URI
