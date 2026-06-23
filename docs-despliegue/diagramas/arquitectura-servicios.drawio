@@ -1,0 +1,65 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="lToTG-q_BItwd6P8LDJ4">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="tXu1L_zzrIWn4XEq412z-14" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Usuario / red pública&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="265" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-15" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Firewall perimetral (pfSense)&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Único punto de entrada&lt;/div&gt;&lt;div&gt;Aplicación de reglas NAT&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="265" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-43" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-42">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Inventario web (Frontend)&lt;/b&gt;&lt;/span&gt;&lt;br&gt;&lt;div&gt;Pod/contenedor: puerto 80 (nginx)&lt;/div&gt;&lt;div&gt;Service NodePort: :30000 (acceso externo)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="265" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;inventario-db&lt;/font&gt;&lt;/b&gt;&lt;div&gt;MongoDB - :27017&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="235" x="315" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;ubicacion-db&lt;/font&gt;&lt;/b&gt;&lt;div&gt;SQL Server - :1433&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="235" x="-52.5" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-29" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;ldap-service&lt;/font&gt;&lt;/b&gt;&lt;div&gt;AD/LDAP - :389&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="225" x="680" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-44" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-26">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="432" y="670" />
+              <mxPoint x="65" y="670" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-46" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-47" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-29">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="432" y="670" />
+              <mxPoint x="792" y="670" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-42" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Backend (Spring Boot)&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Pod/contenedor: puerto 8080&lt;/div&gt;&lt;div&gt;Service NodePort: :30001&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="335" x="265" y="539.5" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-48" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 20px;&quot;&gt;Reglas de red (modelo zero-trust)&lt;/font&gt;&lt;/b&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;div&gt;El tráfico externo entra únicamente por el firewall perimetral&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Solo el frontend queda expuesto a la red pública (HTTP)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Solo el backend accede a las bases de datos y al directorio&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Las bases de datos aceptan conexiones solo del backend&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;El resto del tráfico interno se bloquea&lt;/div&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="230" width="525" x="170" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-49" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="HTTP" vertex="1">
+          <mxGeometry height="30" width="60" x="440" y="330" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

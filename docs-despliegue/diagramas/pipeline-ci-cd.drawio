@@ -1,0 +1,61 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="lToTG-q_BItwd6P8LDJ4">
+    <mxGraphModel dx="1406" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-9" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="M1iTAafZKkwyQETNJHOQ-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Push / merge a rama principal&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Dispara el workflow de GitHub Actions&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="260" x="330" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-10" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="M1iTAafZKkwyQETNJHOQ-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Build &amp;amp; test&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Compila el backend y construye imágenes de contenedor&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="360" x="280" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-11" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="M1iTAafZKkwyQETNJHOQ-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Inyección de GitHub Secrets&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Credenciales e IPs nunca hardcodeadas&lt;b&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;Se consumen como variables de entorno&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="320" x="300" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-19" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="M1iTAafZKkwyQETNJHOQ-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;&lt;b style=&quot;&quot;&gt;Aplicar manifiestos de Kubernetes (orden estricto)&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font&gt;&lt;b style=&quot;&quot;&gt;&lt;br&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font&gt;&lt;b style=&quot;&quot;&gt;&lt;br&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font&gt;&lt;b style=&quot;&quot;&gt;&lt;br&gt;&lt;/b&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;1- Servicio de identidad (Active Directory / LDAP)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;2- Base de datos SQL Server (ubicación)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;3- Base de datos MongoDB (hardware)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;4- Backend + Frontend (aplicación web)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="330" width="540.01" x="189.99" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b style=&quot;&quot;&gt;Ecosistema desplegado&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="280.02" x="319.98" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Despliegue en orden de dependencias" vertex="1">
+          <mxGeometry height="30" width="240" x="460" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-16" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="M1iTAafZKkwyQETNJHOQ-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="400" x="260" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-17" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="M1iTAafZKkwyQETNJHOQ-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="400" x="260" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-18" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="M1iTAafZKkwyQETNJHOQ-15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="400" x="260" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="400" x="260" y="690" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

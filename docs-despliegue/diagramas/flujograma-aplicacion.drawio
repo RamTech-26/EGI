@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="lToTG-q_BItwd6P8LDJ4">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="tXu1L_zzrIWn4XEq412z-14" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Usuario abre la aplicación web&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="90" width="275" x="160" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-15" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Ingresa sus credenciales&lt;/b&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="90" width="275" x="160" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-43" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-42">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Backend valida contra AD/LDAP&lt;/b&gt;&lt;/span&gt;&lt;br&gt;&lt;div&gt;Bind contra el directorio&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="130" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-58" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-52">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-64" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-63">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-42" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;¿Login válido?&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="90" width="175" x="210" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-51" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-54">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-52" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Emite token con el rol&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Rol derivado del grupo del usuario&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="130" y="590" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-53" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-54" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-56">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-54" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Consulta un equipo por su código&lt;/b&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="130" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-55" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-56" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-57">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-56" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Backend consulta SQL Server&lt;/b&gt;&lt;/span&gt;&lt;br&gt;&lt;div&gt;Obtiene ubicación y responsable&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="130" y="870" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-62" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-60">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-57" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Backend consulta MongoDB&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Obtiene el hardware por código&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="130" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-59" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-60" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Muestra la ficha combinada&lt;/b&gt;&lt;/span&gt;&lt;br&gt;&lt;div&gt;Ubicación + Responsable + Hardware&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="130" y="1150" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-61" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Acciones disponibles según el rol&lt;/font&gt;&lt;/b&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Lector consulta&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Editor crea y modifica&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;Administrador además elimina&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;La autorización se valida siempre en el backend&lt;/div&gt;" vertex="1">
+          <mxGeometry height="170" width="335" x="130" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-63" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Acceso denegado&lt;/b&gt;&lt;/span&gt;&lt;div&gt;Vuelve al login&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="275" x="495" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-65" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="No" vertex="1">
+          <mxGeometry height="30" width="60" x="435" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-66" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Sí" vertex="1">
+          <mxGeometry height="30" width="60" x="305" y="560" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

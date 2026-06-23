@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="lToTG-q_BItwd6P8LDJ4">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="tXu1L_zzrIWn4XEq412z-14" edge="1" parent="1" source="M1iTAafZKkwyQETNJHOQ-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="M1iTAafZKkwyQETNJHOQ-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Usuario ingresa credenciales&lt;/font&gt;&lt;/b&gt;&lt;div&gt;En la interfaz web&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="265" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-15" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Backend valida contra LDAP&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Bind contra Active Directory&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="265" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-16" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Emite token con el rol&lt;/font&gt;&lt;/b&gt;&lt;div&gt;El rol se deriva del grupo del usuario en el directorio&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="335" x="265" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-37" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Rol editor&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Consulta y edita&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="235" x="315" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-10" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;La autorización se valida en el backend&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Una acción no permitida se rechaza en el servidor, aunque la interfaz llegara a mostrar el botón&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="445" x="210" y="1060" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-21" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="60" y="500" as="sourcePoint" />
+            <mxPoint x="800" y="500" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-36" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-31">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Rol lector&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Solo consulta&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="235" x="-55" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-28" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.488;entryY=0.001;entryDx=0;entryDy=0;entryPerimeter=0;" target="tXu1L_zzrIWn4XEq412z-26" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="60" y="500" as="sourcePoint" />
+            <mxPoint x="60" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-38" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-29" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;b&gt;&lt;font style=&quot;font-size: 17px;&quot;&gt;Rol administrador&lt;/font&gt;&lt;/b&gt;&lt;div&gt;Control total&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="225" x="690" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-30" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;entryX=0.49;entryY=-0.004;entryDx=0;entryDy=0;entryPerimeter=0;" target="tXu1L_zzrIWn4XEq412z-29" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="800" y="500" as="sourcePoint" />
+            <mxPoint x="800" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-39" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="62" y="980" />
+              <mxPoint x="433" y="980" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-31" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Ver inventario&lt;/b&gt;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Ver ubicación&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Ver hardware&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Sin modificar&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="210" width="235" x="-55" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-41" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-34" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Todo lo del lector&lt;/b&gt;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Crear equipos&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Editar registros&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Actualizar datos&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="210" width="235" x="315" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-40" edge="1" parent="1" source="tXu1L_zzrIWn4XEq412z-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="tXu1L_zzrIWn4XEq412z-10">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="980" />
+              <mxPoint x="433" y="980" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tXu1L_zzrIWn4XEq412z-35" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Todo lo del editor&lt;/b&gt;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Eliminar registros&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Gestionar usuarios&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 17px;&quot;&gt;&lt;b&gt;Cambiar roles&lt;/b&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="210" width="235" x="685" y="710" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
