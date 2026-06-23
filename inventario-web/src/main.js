@@ -1,0 +1,558 @@
+﻿import "./style.css";
+import {
+  login,
+  logout,
+  obtenerEquipos,
+  obtenerInventarioCompleto,
+  crearEquipo,
+  eliminarEquipo,
+  obtenerUbicaciones,
+  obtenerResponsables,
+  crearUbicacion,
+  crearResponsable,
+  crearHardware,
+  obtenerUsuariosAD,
+  cambiarRolUsuario
+} from "./api.js";
+
+const app = document.querySelector("#app");
+
+function renderLogin() {
+  app.innerHTML = `
+    <main class="login-page">
+      <section class="login-card">
+        <div class="login-logo-box">
+          <img src="/logo-uncuyo-itu.png" alt="UNCuyo ITU Virtual" class="login-logo" />
+        </div>
+        <div class="login-title-box">
+          <h1>SITU</h1>
+          <p> Sistema de Inventario Universitario</p>
+        </div>
+        <form id="login-form" class="login-form">
+          <label for="username">Usuario</label>
+          <input type="text" id="username" placeholder="admin" required />
+          <label for="password">Contraseña</label>
+          <input type="password" id="password" placeholder="admin" required />
+          <button type="submit">Acceder</button>
+        </form>
+        <p id="login-message" class="message"></p>
+
+        <div class="login-footer">
+  <span>Inventario institucional</span>
+  <span>Acceso seguro por roles</span>
+</div>
+        </div>
+      </section>
+    </main>
+  `;
+
+  document.querySelector("#login-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const username = document.querySelector("#username").value.trim();
+    const password = document.querySelector("#password").value.trim();
+    const message = document.querySelector("#login-message");
+
+   
+    try {
+      const data = await login(username, password);
+      message.textContent = `Sesión iniciada como ${data.username}`;
+      renderDashboard();
+    } catch (error) {
+      message.textContent = "Credenciales inválidas. Verificá usuario, contraseña y rol asignado.";
+    }
+  });
+}
+
+function renderDashboard() {
+  const username = localStorage.getItem("username") || "usuario";
+  const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+  const esAdmin = roles.includes("ADMINISTRADOR");
+
+  app.innerHTML = `
+    <main class="layout">
+     <aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="itu-virtual_sidebar.png" alt=" ITU Virtual" class="sidebar-logo" />
+    <h2>SITU</h2>
+    <p>Aulas y Laboratorios</p>
+  </div>
+  <button id="btn-inventario">Inventario</button>
+        <button id="btn-alta-equipo">Alta de equipo</button>
+        <button id="btn-alta-ubicacion">Alta de ubicación</button>
+        <button id="btn-alta-responsable">Alta de responsable</button>
+        ${esAdmin ? `<button id="btn-usuarios-ad">Gestión de usuarios</button>` : ""}
+        <button id="btn-salir">Cerrar sesión</button>
+      </aside>
+      <section class="content">
+        <header class="topbar">
+          <div>
+            <h1>Gestión de inventario de aulas</h1>
+            <p>Usuario autenticado: ${username}</p>
+          </div>
+          <span>JWT activo</span>
+        </header>
+        <section id="main-section"></section>
+      </section>
+    </main>
+  `;
+
+  document.querySelector("#btn-inventario").addEventListener("click", renderInventario);
+  document.querySelector("#btn-alta-equipo").addEventListener("click", renderAltaEquipo);
+  document.querySelector("#btn-alta-ubicacion").addEventListener("click", renderAltaUbicacion);
+  document.querySelector("#btn-alta-responsable").addEventListener("click", renderAltaResponsable);
+  if (esAdmin) {
+    document.querySelector("#btn-usuarios-ad").addEventListener("click", renderGestionUsuarios);
+  }
+  document.querySelector("#btn-salir").addEventListener("click", () => {
+    logout();
+    renderLogin();
+  });
+
+  renderInventario();
+}
+
+async function renderInventario() {
+  const section = document.querySelector("#main-section");
+  section.innerHTML = `
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Equipos registrados</h2>
+          <p>Listado obtenido desde /api/equipos.</p>
+        </div>
+        <button id="btn-recargar" class="primary-button">Recargar</button>
+      </div>
+      <div id="tabla-container"><p>Cargando equipos...</p></div>
+    </section>
+  `;
+  document.querySelector("#btn-recargar").addEventListener("click", renderInventario);
+  try {
+    const equipos = await obtenerEquipos();
+    renderTablaEquipos(equipos);
+  } catch (error) {
+    document.querySelector("#tabla-container").innerHTML = `<p>No se pudieron cargar los equipos. Verificá credenciales o permisos del usuario.</p>`;
+  }
+}
+
+function renderTablaEquipos(equipos) {
+  const container = document.querySelector("#tabla-container");
+  if (!equipos.length) {
+    container.innerHTML = `<p>No hay equipos registrados.</p>`;
+    return;
+  }
+  container.innerHTML = `
+    <table class="fixed-table inventory-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Código</th>
+          <th>Fecha adq.</th>
+          <th>Mantenimiento</th>
+          <th>Devolución</th>
+          <th>Ubicación</th>
+          <th>Responsable</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${equipos.map((equipo) => `
+          <tr>
+            <td>${equipo.id}</td>
+            <td>${equipo.codigo}</td>
+            <td>${equipo.fechaAdquisicion || ''}</td>
+            <td>${equipo.fechaMantenimiento || ''}</td>
+            <td>${equipo.fechaDevolucion || ''}</td>
+            <td>${equipo.edificio || ''} - ${equipo.area || ''} - ${equipo.numero || ''}</td>
+            <td>${equipo.nombre || ''} ${equipo.apellido || ''} (${equipo.tipo || ''})</td>
+            <td>
+              <button class="btn-ver" data-id="${equipo.id}">Ver inventario</button>
+              <button class="btn-eliminar" data-id="${equipo.id}">Eliminar</button>
+            </td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
+  document.querySelectorAll(".btn-ver").forEach((button) => {
+    button.addEventListener("click", () => renderDetalleInventario(button.dataset.id));
+  });
+  document.querySelectorAll(".btn-eliminar").forEach((button) => {
+    button.addEventListener("click", () => eliminarEquipoDesdeVista(button.dataset.id));
+  });
+}
+
+async function renderDetalleInventario(idEquipo) {
+  const section = document.querySelector("#main-section");
+  section.innerHTML = `
+    <section class="panel">
+      <button id="volver">← Volver</button>
+      <p>Cargando inventario completo...</p>
+    </section>
+  `;
+  document.querySelector("#volver").addEventListener("click", renderInventario);
+  try {
+    const inventario = await obtenerInventarioCompleto(idEquipo);
+    renderDetalle(inventario);
+  } catch (error) {
+    section.innerHTML = `
+      <section class="panel">
+        <button id="volver">← Volver</button>
+        <p>No se pudo cargar el inventario del equipo ${idEquipo}. Verificá credenciales o permisos del usuario.</p>
+      </section>
+    `;
+    document.querySelector("#volver").addEventListener("click", renderInventario);
+  }
+}
+
+function renderDetalle(inventario) {
+  const section = document.querySelector("#main-section");
+  const { equipo, ubicacion, responsable, componentes } = inventario;
+  section.innerHTML = `
+    <section class="panel">
+      <button id="volver">← Volver</button>
+      <h2>Inventario completo del equipo ${equipo.codigo}</h2>
+      <div class="detail-grid">
+        <article>
+          <h3>Equipo - SQL Server</h3>
+          <p><strong>ID:</strong> ${equipo.id}</p>
+          <p><strong>Código:</strong> ${equipo.codigo}</p>
+          <p><strong>Fecha adquisición:</strong> ${equipo.fechaAdquisicion}</p>
+        </article>
+        <article>
+          <h3>Ubicación - SQL Server</h3>
+          <p><strong>ID:</strong> ${ubicacion.id}</p>
+          <p><strong>Edificio:</strong> ${ubicacion.edificio}</p>
+          <p><strong>Área:</strong> ${ubicacion.area}</p>
+        </article>
+        <article>
+          <h3>Responsable - SQL Server</h3>
+          <p><strong>Nombre:</strong> ${responsable.nombre} ${responsable.apellido}</p>
+          <p><strong>Email:</strong> ${responsable.email}</p>
+          <p><strong>Teléfono:</strong> ${responsable.telefono}</p>
+        </article>
+        <article>
+          <h3>Componentes - MongoDB</h3>
+          ${componentes && componentes.length ? componentes.map((c) => `
+            <div class="componente">
+              <p><strong>Fabricante:</strong> ${c.fabricante}</p>
+              <p><strong>Modelo:</strong> ${c.modelo}</p>
+              <p><strong>Tipo:</strong> ${c.tipo}</p>
+              <p><strong>CPU:</strong> ${c.cpu}</p>
+              <p><strong>RAM:</strong> ${c.ram}</p>
+              <p><strong>Disco:</strong> ${c.disco}</p>
+              <p><strong>SO:</strong> ${c.sistemaOperativo}</p>
+              <p><strong>Monitor:</strong> ${c.monitor}</p>
+              <p><strong>Mouse:</strong> ${c.mouse}</p>
+              <p><strong>Teclado:</strong> ${c.teclado}</p>
+            </div>
+          `).join("") : "<p>Sin componentes registrados.</p>"}
+        </article>
+      </div>
+    </section>
+  `;
+  document.querySelector("#volver").addEventListener("click", renderInventario);
+}
+
+async function renderAltaEquipo() {
+  const section = document.querySelector("#main-section");
+  section.innerHTML = `
+    <section class="panel">
+      <h2>Alta de equipo</h2>
+      <form id="form-alta" class="form-grid">
+        <h3>Datos del equipo (SQL Server)</h3>
+      
+        <div class="form-field">
+          <label for="codigo">Código</label>
+          <input id="codigo" placeholder="PC-01" required />
+        </div>
+      
+        <div class="form-field">
+          <label for="fechaAdquisicion">Fecha de adquisición</label>
+          <input id="fechaAdquisicion" type="date" required />
+        </div>
+      
+        <div class="form-field">
+          <label for="fechaMantenimiento">Fecha de mantenimiento</label>
+          <input id="fechaMantenimiento" type="date" />
+        </div>
+      
+        <div class="form-field">
+          <label for="fechaDevolucion">Fecha de devolución</label>
+          <input id="fechaDevolucion" type="date" />
+        </div>
+      
+        <div class="form-field">
+          <label for="ubicacionId">Ubicación</label>
+          <select id="ubicacionId" required>
+            <option value="">Cargando ubicaciones...</option>
+          </select>
+        </div>
+      
+        <div class="form-field">
+          <label for="responsableId">Responsable</label>
+          <select id="responsableId" required>
+            <option value="">Cargando responsables...</option>
+          </select>
+        </div>
+      
+        <h3>Datos de hardware (MongoDB)</h3>
+      
+        <div class="form-field">
+          <label for="hw-fabricante">Fabricante</label>
+          <input id="hw-fabricante" placeholder="Dell" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-modelo">Modelo</label>
+          <input id="hw-modelo" placeholder="OptiPlex 3000" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-tipo">Tipo</label>
+          <input id="hw-tipo" placeholder="desktop / notebook" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-cpu">CPU</label>
+          <input id="hw-cpu" placeholder="i5-12400" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-ram">RAM</label>
+          <input id="hw-ram" placeholder="16GB" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-disco">Disco</label>
+          <input id="hw-disco" placeholder="512GB SSD" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-so">Sistema Operativo</label>
+          <input id="hw-so" placeholder="Windows 11" required />
+        </div>
+        <div class="form-field">
+          <label for="hw-monitor">Monitor</label>
+          <input id="hw-monitor" placeholder="Dell 24&quot;" />
+        </div>
+        <div class="form-field">
+          <label for="hw-mouse">Mouse</label>
+          <input id="hw-mouse" placeholder="Dell" />
+        </div>
+        <div class="form-field">
+          <label for="hw-teclado">Teclado</label>
+          <input id="hw-teclado" placeholder="Dell" />
+        </div>
+      
+        <button type="submit">Guardar equipo completo</button>
+      </form>
+    </section>
+  `;
+
+  try {
+    const [ubicaciones, responsables] = await Promise.all([
+      obtenerUbicaciones(),
+      obtenerResponsables()
+    ]);
+    document.querySelector("#ubicacionId").innerHTML =
+        `<option value="">Seleccionar ubicación</option>` +
+        ubicaciones.map((u) => `<option value="${u.id}">${u.edificio} - ${u.area}</option>`).join("");
+    document.querySelector("#responsableId").innerHTML =
+        `<option value="">Seleccionar responsable</option>` +
+        responsables.map((r) => `<option value="${r.id}">${r.nombre} ${r.apellido}</option>`).join("");
+  } catch (error) {
+    document.querySelector("#ubicacionId").innerHTML = `<option value="">Error al cargar</option>`;
+    document.querySelector("#responsableId").innerHTML = `<option value="">Error al cargar</option>`;
+  }
+
+  document.querySelector("#form-alta").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const codigo = document.querySelector("#codigo").value.trim();
+    const equipo = {
+      codigo,
+      fechaAdquisicion: document.querySelector("#fechaAdquisicion").value,
+      fechaMantenimiento: document.querySelector("#fechaMantenimiento").value || null,
+      fechaDevolucion: document.querySelector("#fechaDevolucion").value || null,
+      ubicacion: { id: Number(document.querySelector("#ubicacionId").value) },
+      responsable: { id: Number(document.querySelector("#responsableId").value) }
+    };
+    const hardware = {
+      id: codigo,
+      fabricante: document.querySelector("#hw-fabricante").value.trim(),
+      modelo: document.querySelector("#hw-modelo").value.trim(),
+      tipo: document.querySelector("#hw-tipo").value.trim(),
+      cpu: document.querySelector("#hw-cpu").value.trim(),
+      ram: document.querySelector("#hw-ram").value.trim(),
+      disco: document.querySelector("#hw-disco").value.trim(),
+      sistemaOperativo: document.querySelector("#hw-so").value.trim(),
+      monitor: document.querySelector("#hw-monitor").value.trim(),
+      mouse: document.querySelector("#hw-mouse").value.trim(),
+      teclado: document.querySelector("#hw-teclado").value.trim()
+    };
+    try {
+      await crearEquipo(equipo);
+      await crearHardware(hardware);
+      alert("Equipo y hardware creados correctamente");
+      renderInventario();
+    } catch (error) {
+      alert("No se pudo crear el equipo. Verificá credenciales, permisos o que el código no exista.");
+    }
+  });
+}
+
+function renderAltaUbicacion() {
+  const section = document.querySelector("#main-section");
+  section.innerHTML = `
+    <section class="panel">
+      <h2>Alta de ubicación</h2>
+      <form id="form-ubicacion" class="form-grid">
+        <select id="edificio" required>
+          <option value="">Seleccionar edificio</option>
+          <option value="SEDE_CENTRAL">Sede Central</option>
+          <option value="CAMPUS_TIC">ITU Campus TIC</option>
+        </select>
+        <select id="area" required>
+          <option value="">Seleccionar área</option>
+          <option value="AULA">AULA</option>
+          <option value="LABORATORIO">LABORATORIO</option>
+          <option value="SECRETARIA">SECRETARIA</option>
+        </select>
+        <input id="numeroArea" type="number" placeholder="Número de área (ej: 1)" required />
+        <button type="submit">Guardar ubicación</button>
+      </form>
+    </section>
+  `;
+  document.querySelector("#form-ubicacion").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const ubicacion = {
+      edificio: document.querySelector("#edificio").value,
+      area: document.querySelector("#area").value,
+      numeroArea: Number(document.querySelector("#numeroArea").value)
+    };
+    try {
+      await crearUbicacion(ubicacion);
+      alert("Ubicación creada correctamente");
+      renderInventario();
+    } catch (error) {
+      alert("No se pudo crear la ubicación. Verificá credenciales o permisos del usuario.");
+    }
+  });
+}
+
+function renderAltaResponsable() {
+  const section = document.querySelector("#main-section");
+  section.innerHTML = `
+    <section class="panel">
+      <h2>Alta de responsable</h2>
+      <form id="form-responsable" class="form-grid">
+        <input id="nombre" placeholder="Nombre" required />
+        <input id="apellido" placeholder="Apellido" required />
+        <input id="email" type="email" placeholder="Email (ej: juan@itu.local)" required />
+        <input id="telefono" placeholder="Teléfono" required />
+        <select id="tipo" required>
+          <option value="">Seleccionar tipo</option>
+          <option value="ALUMNO">Alumno</option>
+          <option value="DOCENTE">Docente</option>
+          <option value="TECNICO">Técnico</option>
+        </select>
+        <button type="submit">Guardar responsable</button>
+      </form>
+    </section>
+  `;
+  document.querySelector("#form-responsable").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const responsable = {
+      nombre: document.querySelector("#nombre").value.trim(),
+      apellido: document.querySelector("#apellido").value.trim(),
+      email: document.querySelector("#email").value.trim(),
+      telefono: document.querySelector("#telefono").value.trim(),
+      tipo: document.querySelector("#tipo").value
+    };
+    try {
+      await crearResponsable(responsable);
+      alert("Responsable creado correctamente");
+      renderInventario();
+    } catch (error) {
+      alert("No se pudo crear el responsable. Verificá credenciales o permisos del usuario.");
+    }
+  });
+}
+
+async function renderGestionUsuarios() {
+  const section = document.querySelector("#main-section");
+  section.innerHTML = `
+    <section class="panel">
+      <h2>Gestión de usuarios AD</h2>
+      <div id="tabla-usuarios"><p>Cargando usuarios...</p></div>
+    </section>
+  `;
+
+  try {
+    const usuarios = await obtenerUsuariosAD();
+    const container = document.querySelector("#tabla-usuarios");
+
+    if (!usuarios.length) {
+      container.innerHTML = `<p>No hay usuarios en los grupos de la aplicación.</p>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Rol actual</th>
+            <th>Cambiar a</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${usuarios.map((u) => `
+            <tr>
+              <td>${u.username}</td>
+              <td>${u.rol}</td>
+              <td>
+                <select class="select-rol" data-username="${u.username}">
+                  <option value="">Seleccionar</option>
+                  <option value="GRP_LECTOR" ${u.grupo === "GRP_LECTOR" ? "selected" : ""}>LECTOR</option>
+                  <option value="GRP_EDITOR" ${u.grupo === "GRP_EDITOR" ? "selected" : ""}>EDITOR</option>
+                  <option value="GRP_ADMINISTRADOR" ${u.grupo === "GRP_ADMINISTRADOR" ? "selected" : ""}>ADMINISTRADOR</option>
+                </select>
+              </td>
+              <td>
+                <button class="btn-cambiar-rol" data-username="${u.username}">Cambiar</button>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+
+    document.querySelectorAll(".btn-cambiar-rol").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const username = btn.dataset.username;
+        const select = document.querySelector(`.select-rol[data-username="${username}"]`);
+        const grupo = select.value;
+        if (!grupo) { alert("Seleccioná un rol antes de guardar el cambio."); return; }
+        try {
+          await cambiarRolUsuario(username, grupo);
+          alert(`Rol de ${username} actualizado correctamente`);
+          renderGestionUsuarios();
+        } catch (error) {
+          alert("No se pudo cambiar el rol. Verificá credenciales o permisos de administrador.");
+        }
+      });
+    });
+
+  } catch (error) {
+    document.querySelector("#tabla-usuarios").innerHTML = `<p>No se pudieron cargar los usuarios AD. Verificá credenciales o permisos de administrador.</p>`;
+  }
+}
+
+async function eliminarEquipoDesdeVista(id) {
+  const confirmado = confirm(`¿Seguro que querés eliminar el equipo con ID ${id}?`);
+  if (!confirmado) return;
+  try {
+    await eliminarEquipo(id);
+    alert("Equipo eliminado correctamente");
+    renderInventario();
+  } catch (error) {
+    alert("No se pudo eliminar el equipo. Verificá credenciales o permisos del usuario.");
+  }
+}
+
+renderLogin();
