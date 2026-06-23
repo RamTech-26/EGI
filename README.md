@@ -502,15 +502,6 @@ LDAP_ADMIN_USER=svc_admin@itu.local
 LDAP_ADMIN_PASSWORD=Itu12345!
 ```
 
----
-
-# Rama de Desarrollo
-
-```text
-prueba-integracion-matias
-```
-
----
 
 # Tecnologías Utilizadas
 
