@@ -62,7 +62,7 @@ env:
     valueFrom:
       secretKeyRef: {name: backend-secret, key: LDAP_ADMIN_PASSWORD}
   - name: SPRING_DATA_MONGODB_URI
-    value: "mongodb://app-inventario:password123@inventario-db:27017/inventario"
+    value: "mongodb://app-inventario:<PASSWORD_MONGO>@inventario-db:27017/inventario"
 ```
 
 **Por qué:** el `application.yaml` real del backend (rama `prueba-integracion-v1`) espera estas 7 variables (`${SQL_USERNAME}`, `${SPRING_LDAP_USERNAME}`, etc.) y ninguna estaba mapeada en el Deployment. Sin ellas, Spring fallaba al arrancar con `PlaceholderResolutionException: Could not resolve placeholder 'SPRING_LDAP_USERNAME'`. La URI de Mongo no existía en ningún Secret ni ConfigMap, así que se agregó como valor literal directo.
@@ -103,11 +103,11 @@ stringData:
 ```yaml
 stringData:
   SQL_USERNAME: "app_inventario"
-  SQL_PASSWORD: "Itu12345!"
-  LDAP_USER: "svc_backend@itu.local"
-  LDAP_PASSWORD: "Itu12345!"
-  LDAP_ADMIN_USER: "svc_admin@itu.local"
-  LDAP_ADMIN_PASSWORD: "Itu12345!"
+  SQL_PASSWORD: "<PASSWORD_ITU>"
+  LDAP_USER: "<LDAP_BIND_USER>"
+  LDAP_PASSWORD: "<PASSWORD_ITU>"
+  LDAP_ADMIN_USER: "<LDAP_ADMIN_USER>"
+  LDAP_ADMIN_PASSWORD: "<PASSWORD_ITU>"
 ```
 
 **Por qué:** el archivo real (gitignoreado) nunca había sido creado en este entorno. Se le agregaron además las credenciales de `svc_admin` (bind de escritura LDAP), que el `.example` original no contemplaba y que el `application.yaml` sí necesita (`SPRING_LDAPADMIN_USERNAME`/`PASSWORD`).
@@ -128,12 +128,12 @@ stringData:
 ```yaml
 stringData:
   MONGO_INITDB_ROOT_USERNAME: "app-inventario"
-  MONGO_INITDB_ROOT_PASSWORD: "password123"
+  MONGO_INITDB_ROOT_PASSWORD: "<PASSWORD_MONGO>"
   MONGO_USER: "app-inventario"
-  MONGO_PASS: "password123"
+  MONGO_PASS: "<PASSWORD_MONGO>"
 ```
 
-**Por qué:** el Deployment de Mongo (`feature/infra-k8s`) referencia `MONGO_INITDB_ROOT_USERNAME`/`PASSWORD` (nombres estándar de la imagen oficial de Mongo), mientras que el `.example` original solo traía `MONGO_USER`/`MONGO_PASS`. Se incluyeron ambos pares para no tener que decidir cuál usa exactamente cada parte del sistema. Las credenciales (`app-inventario` / `password123`) son las que ya estaban en `init-mongo.js` de la rama `feature/backend-mongo` (Agus).
+**Por qué:** el Deployment de Mongo (`feature/infra-k8s`) referencia `MONGO_INITDB_ROOT_USERNAME`/`PASSWORD` (nombres estándar de la imagen oficial de Mongo), mientras que el `.example` original solo traía `MONGO_USER`/`MONGO_PASS`. Se incluyeron ambos pares para no tener que decidir cuál usa exactamente cada parte del sistema. Las credenciales (`app-inventario` / `<PASSWORD_MONGO>`) son las que ya estaban en `init-mongo.js` de la rama `feature/backend-mongo` (Agus).
 
 ---
 
@@ -274,7 +274,7 @@ Ningún cambio modificó la lógica de negocio del backend ni el diseño de los 
 **Solucion:** ejecutar inventario-db/init-mongo.js dentro del pod de Mongo, autenticado como el usuario root, para crear el usuario app-inventario con rol readWrite acotado a la base inventario:
 
 kubectl cp inventario-db/init-mongo.js inventario/<pod-mongo>:/tmp/init-mongo.js
-kubectl exec -n inventario <pod-mongo> -- mongo admin -u app-inventario -p password123 --authenticationDatabase admin /tmp/init-mongo.js
+kubectl exec -n inventario <pod-mongo> -- mongo admin -u app-inventario -p <PASSWORD_MONGO> --authenticationDatabase admin /tmp/init-mongo.js
 
 **Importante:** repetir este paso cada vez que se recree el PVC de Mongo o el cluster, ya que mongo:4.4 pelado no ejecuta init-mongo.js automaticamente. Pendiente: usar inventario-db/Dockerfile (que si lo monta) en el deployment.
 

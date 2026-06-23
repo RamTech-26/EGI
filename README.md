@@ -397,7 +397,7 @@ No existe persistencia local de usuarios.
 ```json
 {
   "username": "usr.admin",
-  "password": "Itu12345!"
+  "password": "<PASSWORD_ITU>"
 }
 ```
 
@@ -460,12 +460,12 @@ src/main/java/com/inventario/backendapi/
 
 | Usuario        | Contraseña | Grupo             | Rol           | Uso                  |
 | -------------- | ---------- | ----------------- | ------------- | -------------------- |
-| usr.admin      | Itu12345!  | GRP_ADMINISTRADOR | ADMINISTRADOR | Administración total |
-| usr.editor     | Itu12345!  | GRP_EDITOR        | EDITOR        | Lectura y escritura  |
-| usr.lector     | Itu12345!  | GRP_LECTOR        | LECTOR        | Solo lectura         |
-| svc_backend    | Itu12345!  | -                 | -             | Bind LDAP            |
-| svc_admin      | Itu12345!  | GRP_ADMINISTRADOR | -             | Administración AD    |
-| app_inventario | Itu12345!  | -                 | -             | Conexión SQL Server  |
+| usr.admin      | <PASSWORD_ITU>  | GRP_ADMINISTRADOR | ADMINISTRADOR | Administración total |
+| usr.editor     | <PASSWORD_ITU>  | GRP_EDITOR        | EDITOR        | Lectura y escritura  |
+| usr.lector     | <PASSWORD_ITU>  | GRP_LECTOR        | LECTOR        | Solo lectura         |
+| svc_backend    | <PASSWORD_ITU>  | -                 | -             | Bind LDAP            |
+| svc_admin      | <PASSWORD_ITU>  | GRP_ADMINISTRADOR | -             | Administración AD    |
+| app_inventario | <PASSWORD_ITU>  | -                 | -             | Conexión SQL Server  |
 
 ---
 
@@ -474,14 +474,14 @@ src/main/java/com/inventario/backendapi/
 | Variable            | Descripción                   | Ejemplo                                               |
 | ------------------- | ----------------------------- | ----------------------------------------------------- |
 | SQL_USERNAME        | Usuario SQL Server            | app_inventario                                        |
-| SQL_PASSWORD        | Contraseña SQL Server         | Itu12345!                                             |
+| SQL_PASSWORD        | Contraseña SQL Server         | <PASSWORD_ITU>                                             |
 | LDAP_HOST           | IP del controlador de dominio | 192.168.100.50                                        |
 | LDAP_PORT           | Puerto LDAP                   | 389                                                   |
 | LDAP_BASE           | Base DN                       | dc=itu,dc=local                                       |
-| LDAP_USER           | Usuario LDAP                  | [svc_backend@itu.local](mailto:svc_backend@itu.local) |
-| LDAP_PASSWORD       | Contraseña LDAP               | Itu12345!                                             |
-| LDAP_ADMIN_USER     | Usuario administrador LDAP    | [svc_admin@itu.local](mailto:svc_admin@itu.local)     |
-| LDAP_ADMIN_PASSWORD | Contraseña administrador LDAP | Itu12345!                                             |
+| LDAP_USER           | Usuario LDAP                  | [<LDAP_BIND_USER>](mailto:<LDAP_BIND_USER>) |
+| LDAP_PASSWORD       | Contraseña LDAP               | <PASSWORD_ITU>                                             |
+| LDAP_ADMIN_USER     | Usuario administrador LDAP    | [<LDAP_ADMIN_USER>](mailto:<LDAP_ADMIN_USER>)     |
+| LDAP_ADMIN_PASSWORD | Contraseña administrador LDAP | <PASSWORD_ITU>                                             |
 
 ---
 
@@ -489,17 +489,17 @@ src/main/java/com/inventario/backendapi/
 
 ```env
 SQL_USERNAME=app_inventario
-SQL_PASSWORD=Itu12345!
+SQL_PASSWORD=<PASSWORD_ITU>
 
 LDAP_HOST=192.168.100.50
 LDAP_PORT=389
 LDAP_BASE=dc=itu,dc=local
 
-LDAP_USER=svc_backend@itu.local
-LDAP_PASSWORD=Itu12345!
+LDAP_USER=<LDAP_BIND_USER>
+LDAP_PASSWORD=<PASSWORD_ITU>
 
-LDAP_ADMIN_USER=svc_admin@itu.local
-LDAP_ADMIN_PASSWORD=Itu12345!
+LDAP_ADMIN_USER=<LDAP_ADMIN_USER>
+LDAP_ADMIN_PASSWORD=<PASSWORD_ITU>
 ```
 
 

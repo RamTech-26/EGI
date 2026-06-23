@@ -14,7 +14,7 @@ Al cierre de la sesión, el ecosistema completo funciona de punta a punta:
 - Frontend (`inventario-web`) y backend (`backend-api`) corriendo dentro de Minikube ✔
 - MongoDB corriendo dentro de Minikube (pendiente de probar el cruce de hardware) ✔
 
-Usuarios de prueba validados: `usr.admin`, `usr.lector` (contraseña `Itu12345!` para todos).
+Usuarios de prueba validados: `usr.admin`, `usr.lector` (contraseña `<PASSWORD_ITU>` para todos).
 
 ---
 
@@ -115,11 +115,11 @@ metadata:
 type: Opaque
 stringData:
   SQL_USERNAME: "app_inventario"
-  SQL_PASSWORD: "Itu12345!"
-  LDAP_USER: "svc_backend@itu.local"
-  LDAP_PASSWORD: "Itu12345!"
-  LDAP_ADMIN_USER: "svc_admin@itu.local"
-  LDAP_ADMIN_PASSWORD: "Itu12345!"
+  SQL_PASSWORD: "<PASSWORD_ITU>"
+  LDAP_USER: "<LDAP_BIND_USER>"
+  LDAP_PASSWORD: "<PASSWORD_ITU>"
+  LDAP_ADMIN_USER: "<LDAP_ADMIN_USER>"
+  LDAP_ADMIN_PASSWORD: "<PASSWORD_ITU>"
 EOF
 
 cat > k8s/secrets/mongo-secret.yaml << 'EOF'
@@ -131,9 +131,9 @@ metadata:
 type: Opaque
 stringData:
   MONGO_INITDB_ROOT_USERNAME: "app-inventario"
-  MONGO_INITDB_ROOT_PASSWORD: "password123"
+  MONGO_INITDB_ROOT_PASSWORD: "<PASSWORD_MONGO>"
   MONGO_USER: "app-inventario"
-  MONGO_PASS: "password123"
+  MONGO_PASS: "<PASSWORD_MONGO>"
 EOF
 ```
 
@@ -188,7 +188,7 @@ Could not resolve placeholder 'SPRING_LDAP_USERNAME' in value "${SPRING_LDAP_USE
   valueFrom:
     secretKeyRef: {name: backend-secret, key: LDAP_ADMIN_PASSWORD}
 - name: SPRING_DATA_MONGODB_URI
-  value: "mongodb://app-inventario:password123@inventario-db:27017/inventario"
+  value: "mongodb://app-inventario:<PASSWORD_MONGO>@inventario-db:27017/inventario"
 ```
 
 ### 6.3 — Frontend pega a `localhost:8080` en vez del backend real (CORS Failed)
@@ -380,7 +380,7 @@ Esto es lo que cambia y lo que hay que verificar al mover todo a una computadora
 
 - Las IPs internas `10.10.10.10` (DC) y `10.10.10.20` (SQL) **siguen iguales**, porque son parte de la Red Interna de VirtualBox (`LAN-SERVER`), que es virtual y no depende de la red física de la PC anfitriona.
 - Los manifiestos de Kubernetes, Secrets, y el código corregido (CORS, `application.yaml`, datos de enum) **no cambian**.
-- Las credenciales (`Itu12345!`, `app_inventario`, `svc_backend`, etc.) siguen iguales.
+- Las credenciales (`<PASSWORD_ITU>`, `app_inventario`, `svc_backend`, etc.) siguen iguales.
 
 ### 9.2 Qué SÍ cambia y hay que verificar en el lab
 

@@ -66,9 +66,9 @@ Para cada grupo, sobre `OU=Grupos`: clic derecho, Nuevo, Grupo. En el diálogo:
 
 | Usuario | Propósito | Contraseña |
 |---|---|---|
-| `svc_backend` | Bind LDAP de lectura, login y consulta de grupos | `Itu12345!` |
-| `svc_admin` | Bind LDAP de escritura, cambio de grupo de usuarios | `Itu12345!` |
-| `svc-mongo` | MongoDB, LDAP auth | `Itu12345!` |
+| `svc_backend` | Bind LDAP de lectura, login y consulta de grupos | `<PASSWORD_ITU>` |
+| `svc_admin` | Bind LDAP de escritura, cambio de grupo de usuarios | `<PASSWORD_ITU>` |
+| `svc-mongo` | MongoDB, LDAP auth | `<PASSWORD_ITU>` |
 
 Ubicación (`svc_backend` y `svc_admin`): `OU=Usuarios,OU=EGI,DC=itu,DC=local`.
 
@@ -78,7 +78,7 @@ Confirmado: `svc_backend` y `svc_admin` existen en AD con esos nombres exactos (
 
 Sobre `OU=Usuarios`: clic derecho, Nuevo, Usuario. Para cada cuenta:
 - Nombre, nombre de inicio de sesión de usuario (`svc_backend` / `svc_admin`), dominio `@itu.local`
-- Contraseña `Itu12345!`, destildando "El usuario debe cambiar la contraseña en el siguiente inicio" y tildando "La contraseña nunca expira"
+- Contraseña `<PASSWORD_ITU>`, destildando "El usuario debe cambiar la contraseña en el siguiente inicio" y tildando "La contraseña nunca expira"
 
 ### Permiso delegado de svc_admin sobre los grupos de rol
 
@@ -101,9 +101,9 @@ Para que el endpoint `POST /api/auth/admin/agregar-grupo` (cambio de grupo de un
 
 | Usuario | Grupo | Contraseña |
 |---|---|---|
-| `usr.lector` | `GRP_LECTOR` | `Itu12345!` |
-| `usr.editor` | `GRP_EDITOR` | `Itu12345!` |
-| `usr.admin` | `GRP_ADMINISTRADOR` | `Itu12345!` |
+| `usr.lector` | `GRP_LECTOR` | `<PASSWORD_ITU>` |
+| `usr.editor` | `GRP_EDITOR` | `<PASSWORD_ITU>` |
+| `usr.admin` | `GRP_ADMINISTRADOR` | `<PASSWORD_ITU>` |
 
 Ubicación: `OU=Usuarios,OU=EGI,DC=itu,DC=local`
 
@@ -111,7 +111,7 @@ El sistema tiene 3 roles definidos por el enunciado (LECTOR, EDITOR, ADMINISTRAD
 
 ### Creación (consola Usuarios y equipos de Active Directory)
 
-Sobre `OU=Usuarios`: clic derecho, Nuevo, Usuario, repitiendo para `usr.lector`, `usr.editor` y `usr.admin`, con contraseña `Itu12345!` y "La contraseña nunca expira" tildado.
+Sobre `OU=Usuarios`: clic derecho, Nuevo, Usuario, repitiendo para `usr.lector`, `usr.editor` y `usr.admin`, con contraseña `<PASSWORD_ITU>` y "La contraseña nunca expira" tildado.
 
 Luego, para asignar cada usuario a su grupo: abrir las Propiedades del grupo correspondiente (`GRP_LECTOR`, `GRP_EDITOR`, `GRP_ADMINISTRADOR`), pestaña Miembros, Agregar, escribir el nombre del usuario y Aceptar.
 
@@ -123,10 +123,10 @@ El backend usa `sAMAccountName` para identificar usuarios (ej: `usr.lector`).
 
 Bind user de lectura para login y consulta de grupos:
 ```
-svc_backend@itu.local / Itu12345!
+<LDAP_BIND_USER> / <PASSWORD_ITU>
 ```
 
 Bind user de escritura para cambio de grupo (operación de administrador):
 ```
-svc_admin@itu.local / Itu12345!
+<LDAP_ADMIN_USER> / <PASSWORD_ITU>
 ```

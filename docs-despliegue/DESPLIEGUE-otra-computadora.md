@@ -53,7 +53,7 @@ Para **cada VM** (pfSense, DC, SQL, Ubuntu), entrar a **Configuración → Red**
 ### En SQL Server, después de arrancar:
 - Abrir **SQL Server Configuration Manager** → confirmar que el servicio de la instancia `ITULAB` esté **en ejecución**.
 - Mismo chequeo de firewall ICMPv4 que en el DC.
-- Si por algún motivo el login `app_inventario` no conecta, abrir **SSMS** y verificar en Seguridad → Inicios de sesión → Propiedades → que no esté deshabilitado y que la contraseña sea `Itu12345!`.
+- Si por algún motivo el login `app_inventario` no conecta, abrir **SSMS** y verificar en Seguridad → Inicios de sesión → Propiedades → que no esté deshabilitado y que la contraseña sea `<PASSWORD_ITU>`.
 
 ---
 
@@ -174,11 +174,11 @@ metadata:
 type: Opaque
 stringData:
   SQL_USERNAME: "app_inventario"
-  SQL_PASSWORD: "Itu12345!"
-  LDAP_USER: "svc_backend@itu.local"
-  LDAP_PASSWORD: "Itu12345!"
-  LDAP_ADMIN_USER: "svc_admin@itu.local"
-  LDAP_ADMIN_PASSWORD: "Itu12345!"
+  SQL_PASSWORD: "<PASSWORD_ITU>"
+  LDAP_USER: "<LDAP_BIND_USER>"
+  LDAP_PASSWORD: "<PASSWORD_ITU>"
+  LDAP_ADMIN_USER: "<LDAP_ADMIN_USER>"
+  LDAP_ADMIN_PASSWORD: "<PASSWORD_ITU>"
 EOF
 
 cat > k8s/secrets/mongo-secret.yaml << 'EOF'
@@ -190,9 +190,9 @@ metadata:
 type: Opaque
 stringData:
   MONGO_INITDB_ROOT_USERNAME: "app-inventario"
-  MONGO_INITDB_ROOT_PASSWORD: "password123"
+  MONGO_INITDB_ROOT_PASSWORD: "<PASSWORD_MONGO>"
   MONGO_USER: "app-inventario"
-  MONGO_PASS: "password123"
+  MONGO_PASS: "<PASSWORD_MONGO>"
 EOF
 ```
 
@@ -339,7 +339,7 @@ kubectl apply -f k8s/networkpolicies/
 
 ```bash
 curl -s http://$(minikube ip):30001/api/auth/login \
-  -d '{"username":"usr.admin","password":"Itu12345!"}' \
+  -d '{"username":"usr.admin","password":"<PASSWORD_ITU>"}' \
   -H "Content-Type: application/json"
 ```
 
@@ -350,7 +350,7 @@ Después, abrir en el navegador **de la VM Ubuntu**:
 http://<IP-de-minikube>:30000
 ```
 
-Probar login con `usr.admin`, `usr.lector` o `usr.editor` (contraseña `Itu12345!` para todos), y confirmar que el listado de equipos cargue sin el error *"No se pudieron cargar los equipos"*.
+Probar login con `usr.admin`, `usr.lector` o `usr.editor` (contraseña `<PASSWORD_ITU>` para todos), y confirmar que el listado de equipos cargue sin el error *"No se pudieron cargar los equipos"*.
 
 > Si aparece ese error específico, revisar en SSMS que la columna `edificio` de la tabla `ubicaciones` tenga los valores `SEDE_CENTRAL` / `CAMPUS_TIC` (no `Edificio A/B/C` ni ningún otro string que no coincida exactamente con el enum Java).
 
