@@ -262,3 +262,20 @@ Los valores `"Edificio A/B/C"` insertados manualmente no coinciden con ninguna c
 | Datos en SQL Server, tabla `ubicaciones` | Corregidos (valores de `edificio`) |
 
 Ningún cambio modificó la lógica de negocio del backend ni el diseño de los manifiestos de Romina — todos son: variables faltantes, archivos de configuración nunca creados, o datos de seed desincronizados con el modelo Java.
+
+---
+
+## 11. Usuario MongoDB de aplicacion no existia en la base correcta
+
+**Sintoma:** GET /api/hardware devolvia 403 sin body, con cualquier usuario o incluso sin token. El 403 era enganoso: Spring Security autorizaba la peticion sin problema, pero una excepcion no controlada dentro del controller (MongoDB rechazando la autenticacion) terminaba siendo mostrada como 403 generico por el manejador de errores por defecto de Spring Boot.
+
+**Causa real:** el Secret mongo-secret.yaml crea, via MONGO_INITDB_ROOT_USERNAME, un usuario app-inventario root en la base admin. La URI real del backend intenta autenticar ese mismo usuario contra la base inventario, donde nunca existio. MongoDB devolvia AuthenticationFailed (code 18).
+
+**Solucion:** ejecutar inventario-db/init-mongo.js dentro del pod de Mongo, autenticado como el usuario root, para crear el usuario app-inventario con rol readWrite acotado a la base inventario:
+
+kubectl cp inventario-db/init-mongo.js inventario/<pod-mongo>:/tmp/init-mongo.js
+kubectl exec -n inventario <pod-mongo> -- mongo admin -u app-inventario -p password123 --authenticationDatabase admin /tmp/init-mongo.js
+
+**Importante:** repetir este paso cada vez que se recree el PVC de Mongo o el cluster, ya que mongo:4.4 pelado no ejecuta init-mongo.js automaticamente. Pendiente: usar inventario-db/Dockerfile (que si lo monta) en el deployment.
+
+**Diagnostico util para casos similares:** si Spring Security da 403 sin razon aparente (mismo resultado con o sin token), sospechar de una excepcion de aplicacion enmascarada como 403. Confirmar viendo si el metodo del controller aparece en el stack trace de los logs.
