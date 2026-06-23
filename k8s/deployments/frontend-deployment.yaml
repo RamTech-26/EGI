@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventario-web
+  namespace: inventario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventario-web
+  template:
+    metadata:
+      labels:
+        app: inventario-web
+    spec:
+      containers:
+        - name: inventario-web
+          image: ghcr.io/romis2799/inventario-web:v2
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+

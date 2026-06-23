@@ -39,3 +39,7 @@ src/main/resources/application.yaml
 src/main/resources/krb5.conf
 src/main/resources/login.conf
 src/main/resources/*.keytab
+
+# Secrets de Kubernetes (credenciales reales) - nunca commitear
+k8s/secrets/backend-secret.yaml
+k8s/secrets/mongo-secret.yaml
