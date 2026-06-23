@@ -503,6 +503,21 @@ LDAP_ADMIN_PASSWORD=<PASSWORD_ITU>
 ```
 
 
+# Diagramas del Proyecto
+
+En `docs-despliegue/diagramas/` se encuentran los diagramas de arquitectura, base de datos, flujo de la aplicacion, login y roles, orden de encendido de las VMs, y pipeline CI/CD. Estan en formato `.drawio` (editable en app.diagrams.net o en draw.io desktop).
+
+| Diagrama | Archivo |
+|---|---|
+| Arquitectura de servicios | `docs-despliegue/diagramas/arquitectura-servicios.drawio` |
+| Base de datos | `docs-despliegue/diagramas/diagrama-base-datos.drawio` |
+| Flujograma de la aplicacion | `docs-despliegue/diagramas/flujograma-aplicacion.drawio` |
+| Login y roles | `docs-despliegue/diagramas/login-y-roles.drawio` |
+| Orden de encendido de las VMs | `docs-despliegue/diagramas/orden-de-encendido.drawio` |
+| Pipeline CI/CD | `docs-despliegue/diagramas/pipeline-ci-cd.drawio` |
+
+---
+
 # Tecnologías Utilizadas
 
 * Java 21
