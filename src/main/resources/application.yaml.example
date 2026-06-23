@@ -1,0 +1,28 @@
+# Plantilla de configuración - Copiar a application.yaml y completar valores
+spring:
+  application:
+    name: backend-api
+  config:
+    import: "configtree:/etc/secrets/"
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SQL_USERNAME}
+    password: ${SQL_PASSWORD}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}
+  ldap:
+    urls: ${SPRING_LDAP_URLS}
+    base: ${SPRING_LDAP_BASE}
+    username: ${SPRING_LDAP_USERNAME}
+    password: ${SPRING_LDAP_PASSWORD}
+  ldap-admin:
+    urls: ${SPRING_LDAPADMIN_URLS}
+    base: ${SPRING_LDAPADMIN_BASE}
+    username: ${SPRING_LDAPADMIN_USERNAME}
+    password: ${SPRING_LDAPADMIN_PASSWORD}

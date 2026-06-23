@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-api
+  namespace: inventario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-api
+  template:
+    metadata:
+      labels:
+        app: backend-api
+    spec:
+      serviceAccountName: sa-backend
+      volumes:
+        - name: secrets-volume
+          secret:
+            secretName: backend-secret
+        - name: mongo-secrets-volume
+          secret:
+            secretName: mongo-secret
+      containers:
+        - name: backend-api
+          image: ghcr.io/romis2799/backend-api:v4
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: secrets-volume
+              mountPath: /etc/secrets
+              readOnly: true
+            - name: mongo-secrets-volume
+              mountPath: /etc/secrets/mongo
+              readOnly: true
+          env:
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_LDAP_URLS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SPRING_LDAP_URLS
+            - name: SPRING_LDAP_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SPRING_LDAP_BASE
+            - name: SPRING_LDAPADMIN_URLS
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SPRING_LDAPADMIN_URLS
+            - name: SPRING_LDAPADMIN_BASE
+              valueFrom:
+                configMapKeyRef:
+                  name: app-config
+                  key: SPRING_LDAPADMIN_BASE
+            - name: SQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_USERNAME
+            - name: SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SQL_PASSWORD
+            - name: SPRING_LDAP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SPRING_LDAP_USERNAME
+            - name: SPRING_LDAP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SPRING_LDAP_PASSWORD
+            - name: SPRING_LDAPADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SPRING_LDAPADMIN_USERNAME
+            - name: SPRING_LDAPADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SPRING_LDAPADMIN_PASSWORD
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secret
+                  key: SPRING_DATA_MONGODB_URI
