@@ -188,13 +188,14 @@ spring.jpa.hibernate.ddl-auto=update
 
 ### Tabla: responsables
 
-| Columna  | Tipo    |
-| -------- | ------- |
-| id       | INT PK  |
-| nombre   | VARCHAR |
-| apellido | VARCHAR |
-| email    | VARCHAR |
-| telefono | VARCHAR |
+| Columna  | Tipo                                |
+| -------- | ------------------------------------ |
+| id       | INT PK                              |
+| nombre   | VARCHAR                             |
+| apellido | VARCHAR                             |
+| email    | VARCHAR                             |
+| telefono | VARCHAR                             |
+| tipo     | VARCHAR (enum: ALUMNO, DOCENTE, TECNICO) |
 
 ---
 
@@ -308,7 +309,8 @@ No existe persistencia local de usuarios.
 {
   "id": 1,
   "edificio": "Central",
-  "area": "AULA"
+  "area": "AULA",
+  "numeroArea": 12
 }
 ```
 
@@ -322,7 +324,8 @@ No existe persistencia local de usuarios.
   "nombre": "Juan",
   "apellido": "Perez",
   "email": "juan@itu.local",
-  "telefono": "123456"
+  "telefono": "123456",
+  "tipo": "DOCENTE"
 }
 ```
 
@@ -335,8 +338,16 @@ No existe persistencia local de usuarios.
   "id": 1,
   "codigo": "PC-01",
   "fechaAdquisicion": "2025-03-15",
+  "fechaMantenimiento": "2025-09-15",
+  "fechaDevolucion": null,
   "ubicacionId": 1,
-  "responsableId": 1
+  "responsableId": 1,
+  "edificio": "SEDE_CENTRAL",
+  "area": "AULA",
+  "numero": 12,
+  "nombre": "Juan",
+  "apellido": "Perez",
+  "tipo": "DOCENTE"
 }
 ```
 
