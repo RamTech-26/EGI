@@ -314,36 +314,8 @@ Y si el pod se reinicia muy rápido, usar un **pod de debug** con `command: ["sl
 
 ---
 
-## 7. Pendiente para la NetworkPolicies (no aplicado aún en esta sesión)
 
-La documentación de Romina señala un punto crítico que todavía no se aplicó: el set de NetworkPolicies (`deny-all`, `allow-frontend-ingress`, `allow-frontend-to-backend`, `allow-backend-egress`) **no incluye una regla de egress a DNS (puerto 53)**. Sin ella, apenas se activen las políticas, ningún pod va a poder resolver nombres como `inventario-db`, `ldap-service` o `ubicacion-db`, y todo el sistema se rompe.
-
-Ya se preparó el manifiesto faltante (`k8s/networkpolicies/allow-dns-egress.yaml`):
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: allow-dns-egress
-  namespace: inventario
-spec:
-  podSelector: {}
-  policyTypes:
-    - Egress
-  egress:
-    - to:
-        - namespaceSelector: {}
-      ports:
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 53
-```
-
-**Antes de aplicar las NetworkPolicies por primera vez**, aplicar este manifiesto junto con los demás, y volver a probar el login y el listado de equipos para confirmar que sigue funcionando con Zero-Trust activo.
-
----
-
-## 8. Orden completo de despliegue (resumen, sin las correcciones de código)
+## 7. Orden completo de despliegue (resumen, sin las correcciones de código)
 
 Una vez que el código YA tiene todas las correcciones de la sección 6 aplicadas (es decir, para repetir el despliegue de una imagen ya corregida):
 
@@ -372,17 +344,17 @@ Acceso final:
 
 ---
 
-## 9. Despliegue en el laboratorio de la facultad (otra PC, otra red, DHCP)
+## 8. Despliegue en el laboratorio de la facultad (otra PC, otra red, DHCP)
 
 Esto es lo que cambia y lo que hay que verificar al mover todo a una computadora distinta del laboratorio.
 
-### 9.1 Qué NO cambia
+### 8.1 Qué NO cambia
 
 - Las IPs internas `10.10.10.10` (DC) y `10.10.10.20` (SQL) **siguen iguales**, porque son parte de la Red Interna de VirtualBox (`LAN-SERVER`), que es virtual y no depende de la red física de la PC anfitriona.
 - Los manifiestos de Kubernetes, Secrets, y el código corregido (CORS, `application.yaml`, datos de enum) **no cambian**.
 - Las credenciales (`<PASSWORD_ITU>`, `app_inventario`, `svc_backend`, etc.) siguen iguales.
 
-### 9.2 Qué SÍ cambia y hay que verificar en el lab
+### 8.2 Qué SÍ cambia y hay que verificar en el lab
 
 #### a) IP de la VM de Ubuntu en la red del laboratorio (DHCP)
 
@@ -454,11 +426,4 @@ kubectl get pods -n kube-system | grep calico
 7. `kubectl get pods -n inventario` — confirmar que los 3 pods estén `1/1 Running`.
 8. Probar login y listado de equipos antes de la demo en vivo.
 
----
 
-## 10. Notas para la defensa del proyecto
-
-- El nombre real del servidor SQL en AD/DNS es `SERVIDOR-IIS-SQ` (sin la `L` final, por el límite de 15 caracteres de NetBIOS) — no es un typo. Usar ese nombre en documentación y capturas, aunque el código conecta por IP directa y no se ve afectado.
-- El `app-config` ConfigMap hardcodea la IP de SQL Server en `SPRING_DATASOURCE_URL` en vez de usar un Secret — funciona, pero contradice la regla del profesor de "IPs nunca hardcodeadas". Pendiente de mover a Secret para la entrega final.
-- `mongo:4.4` en vez de `mongo:6` es una limitación de hardware (falta de soporte AVX en la VM), documentarlo así si se pregunta en la defensa.
-- El bug del enum `Edificio` (sección 6.8) es un buen ejemplo para mencionar en la defensa sobre la importancia de los dos scripts separados (`01_init_schema.sql` / `02_seed_data.sql`) que pide el profesor — un seed de datos automatizado y versionado habría evitado este desajuste manual entre SSMS y el código Java.
